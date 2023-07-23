@@ -1,0 +1,45 @@
+body {
+  position: relative;
+  height: 96vh;
+  width: 96vw;
+  margin: auto;
+  overflow: hidden;
+}
+
+.board {
+  display: grid;
+  grid-template-rows: repeat(4, 93px);
+  grid-template-columns: repeat(10, 65px);
+  gap: 3px;
+  margin-bottom: 20px;
+  margin-left: 21vw;
+}
+.board .square {
+  background-color: aqua;
+  border: 1px solid navy;
+}
+
+#player {
+  margin-top: 10px;
+  width: 70Vw;
+  height: 35Vh;
+  position: relative;
+  bottom: 10px;
+  left: 13Vw;
+  background-color: burlywood;
+  z-index: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: space-around;
+  align-items: center;
+  justify-items: center;
+}
+#player .card {
+  margin-top: 5px;
+  background-size: cover;
+  width: 65px;
+  height: 93px;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s;
+}
