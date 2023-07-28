@@ -4,19 +4,22 @@ body {
   width: 96vw;
   margin: auto;
   overflow: hidden;
+  justify-content: center;
 }
 
-.board {
+#board {
+  width: 70vw;
   display: grid;
   grid-template-rows: repeat(4, 93px);
   grid-template-columns: repeat(10, 65px);
   gap: 3px;
   margin-bottom: 20px;
-  margin-left: 21vw;
-}
-.board .square {
+  margin-left: 13vw;
   background-color: aqua;
-  border: 1px solid navy;
+  justify-content: center;
+}
+#board .square {
+  transition: all 0.5s;
 }
 
 #player {
@@ -40,6 +43,7 @@ body {
   background-size: cover;
   width: 65px;
   height: 93px;
+  position: relative;
   transform: translate(-50%, -50%);
-  transition: all 0.5s;
+  transition: all 0.1s;
 }
