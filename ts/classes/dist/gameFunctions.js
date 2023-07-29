@@ -1,3 +1,31 @@
+var p = [{ player: new Player("red"), score: 0 },
+    { player: new Player("red2"), score: 0 },
+    { player: new Player("red3"), score: 0 },
+    { player: new Player("red4"), score: 0 }];
+p[0].player.cards = [{ color: "red", value: 3, imgUrl: " string", isJoker: false },
+    { color: "red", value: 4, imgUrl: " string", isJoker: false },
+    { color: "red", value: 5, imgUrl: " string", isJoker: false },
+    { color: "red", value: 6, imgUrl: " string", isJoker: false },
+    { color: "red", value: 7, imgUrl: " string", isJoker: false },
+    { color: "red", value: 8, imgUrl: " string", isJoker: false },];
+p[1].player.cards = [{ color: "red", value: 3, imgUrl: " string", isJoker: false },
+    { color: "red", value: 4, imgUrl: " string", isJoker: false },
+    { color: "red", value: 2, imgUrl: " string", isJoker: false },
+    { color: "red", value: 6, imgUrl: " string", isJoker: false },
+    { color: "red", value: 3, imgUrl: " string", isJoker: false },
+    { color: "red", value: 8, imgUrl: " string", isJoker: false },];
+p[2].player.cards = [{ color: "red", value: 3, imgUrl: " string", isJoker: false },
+    { color: "red", value: 1, imgUrl: " string", isJoker: false },
+    { color: "red", value: 5, imgUrl: " string", isJoker: false },
+    { color: "red", value: 6, imgUrl: " string", isJoker: false },
+    { color: "red", value: 12, imgUrl: " string", isJoker: false },
+    { color: "red", value: 8, imgUrl: " string", isJoker: false },];
+p[3].player.cards = [{ color: "red", value: 3, imgUrl: " string", isJoker: false },
+    { color: "red", value: 11, imgUrl: " string", isJoker: false },
+    { color: "red", value: 5, imgUrl: " string", isJoker: false },
+    { color: "red", value: 12, imgUrl: " string", isJoker: false },
+    { color: "red", value: 7, imgUrl: " string", isJoker: false },
+    { color: "red", value: 8, imgUrl: " string", isJoker: false },];
 function computeScore(players) {
     try {
         if (!players)
@@ -112,3 +140,6 @@ function checkserie(cards, card) {
         console.error(error);
     }
 }
+console.log(p);
+computeScore(p);
+console.log(p);
