@@ -1,31 +1,3 @@
-var p = [{ player: new Player("red"), score: 0 },
-    { player: new Player("red2"), score: 0 },
-    { player: new Player("red3"), score: 0 },
-    { player: new Player("red4"), score: 0 }];
-p[0].player.cards = [{ color: "red", value: 3, imgUrl: " string", isJoker: false },
-    { color: "red", value: 4, imgUrl: " string", isJoker: false },
-    { color: "red", value: 5, imgUrl: " string", isJoker: false },
-    { color: "red", value: 6, imgUrl: " string", isJoker: false },
-    { color: "red", value: 7, imgUrl: " string", isJoker: false },
-    { color: "red", value: 8, imgUrl: " string", isJoker: false },];
-p[1].player.cards = [{ color: "red", value: 3, imgUrl: " string", isJoker: false },
-    { color: "red", value: 4, imgUrl: " string", isJoker: false },
-    { color: "red", value: 2, imgUrl: " string", isJoker: false },
-    { color: "red", value: 6, imgUrl: " string", isJoker: false },
-    { color: "red", value: 3, imgUrl: " string", isJoker: false },
-    { color: "red", value: 8, imgUrl: " string", isJoker: false },];
-p[2].player.cards = [{ color: "red", value: 3, imgUrl: " string", isJoker: false },
-    { color: "red", value: 1, imgUrl: " string", isJoker: false },
-    { color: "red", value: 5, imgUrl: " string", isJoker: false },
-    { color: "red", value: 6, imgUrl: " string", isJoker: false },
-    { color: "red", value: 12, imgUrl: " string", isJoker: false },
-    { color: "red", value: 8, imgUrl: " string", isJoker: false },];
-p[3].player.cards = [{ color: "red", value: 3, imgUrl: " string", isJoker: false },
-    { color: "red", value: 11, imgUrl: " string", isJoker: false },
-    { color: "red", value: 5, imgUrl: " string", isJoker: false },
-    { color: "red", value: 12, imgUrl: " string", isJoker: false },
-    { color: "red", value: 7, imgUrl: " string", isJoker: false },
-    { color: "red", value: 8, imgUrl: " string", isJoker: false },];
 function computeScore(players) {
     try {
         if (!players)
@@ -115,18 +87,27 @@ function checkserie(cards, card) {
             return false;
         }
         if (card === undefined || !card) {
-            var colors_1 = [{ color: "red", set: true },
+            if (cards.length > 3) {
+                alert("Max four cards, can not add");
+                return false;
+            }
+            var colors = [{ color: "red", set: true },
                 { color: "blue", set: true },
                 { color: "yellow", set: true },
                 { color: "black", set: true }];
-            cards.forEach(function (crd) {
-                var color = colors_1.find(function (c) { return c.color === crd.color; });
+            var _loop_1 = function (i) {
+                var color = colors.find(function (c) { return c.color === cards[i].color; });
                 if (color === undefined)
                     throw new Error("No such color");
                 if (!color.set)
-                    return false;
+                    return { value: false };
                 color.set = false;
-            });
+            };
+            for (var i = 0; i < cards.length; i++) {
+                var state_1 = _loop_1(i);
+                if (typeof state_1 === "object")
+                    return state_1.value;
+            }
         }
         else {
             cards.forEach(function (c) {
@@ -140,6 +121,3 @@ function checkserie(cards, card) {
         console.error(error);
     }
 }
-console.log(p);
-computeScore(p);
-console.log(p);
