@@ -19,15 +19,16 @@ var Card = /** @class */ (function () {
     return Card;
 }());
 var Player = /** @class */ (function () {
-    function Player(name) {
+    function Player(name, firstDrop) {
         this.name = name;
         this.cards = [];
+        this.firstDrop = (firstDrop !== undefined) ? firstDrop : false;
     }
     return Player;
 }());
 var gameDeck = getNewDeck();
 var Game = /** @class */ (function () {
-    function Game(player1, player2, player3, player4) {
+    function Game(player1, player2, player3, player4, startIndx, currIndx) {
         this.players = [];
         debugger;
         this.gameDeck = getNewDeck();
@@ -37,6 +38,8 @@ var Game = /** @class */ (function () {
             this.players.push({ player: player3, score: 0 });
         if (player4 !== undefined)
             this.players.push({ player: player4, score: 0 });
+        this.startIndx = (startIndx !== undefined) ? startIndx : this.startIndx;
+        this.currIndx = (currIndx !== undefined) ? currIndx : this.currIndx;
     }
     Game.prototype.pickBigginer = function () {
         var _this = this;
