@@ -11,9 +11,9 @@ function handleInput(event) {
 var formInput = document.querySelector("#name");
 var formButton = document.querySelector("#send");
 function handleSubmit(ev) {
+    ev.preventDefault();
     try {
         if (playerList.length < 4) {
-            ev.preventDefault();
             console.dir(ev);
             var username = ev.target.player.value;
             console.log(username);
@@ -35,6 +35,7 @@ function handleSubmit(ev) {
             formInput === null || formInput === void 0 ? void 0 : formInput.ariaDisabled = "true";
             alert('You have reached the maximum number of players');
         }
+        localStorage.setItem('playerList', JSON.stringify(playerList));
     }
     catch (error) {
         console.error(error);
@@ -49,7 +50,7 @@ function renderPlayers(playersList) {
     if (!playerDetails)
         throw new Error("Player's details not found");
     if (usersWrapper) {
-        usersWrapper.innerHTML += "<div class=\"row\" id=\"\" >\n        <div class=\"playerRow\" id=\"\" style=\"background-color: black\">\n        <div class=\"details\" ><h3> \u05E9\u05D7\u05E7\u05DF \u05DE\u05E1\u05E4\u05E8    " + playerNum + " :    " + playerDetails + "</h3></div>\n      </div> \n      <button type=\"button\" id=\"deletePlayer\" onclick=\"handleDeletePlayer(event)\" >\n      delete\n      </button>\n      </div>";
+        usersWrapper.innerHTML += "<div class=\"row\" id=\"\" >\n        <div class=\"playerRow\" id=\"\" style=\"background-color: black\">\n        <div class=\"details\" ><h3> \u05E9\u05D7\u05E7\u05DF \u05DE\u05E1\u05E4\u05E8    " + playerNum + " :    " + playerDetails + "</h3></div>\n      </div> \n      <button type=\"button\" id=\"\" onclick=\"handleDeletePlayer(event)\" >\n      delete\n      </button>\n      </div>";
     }
     if (playerNum > 1) {
         submitWrapper.innerHTML = '';
@@ -67,9 +68,11 @@ function handleDeletePlayer(playerNum) {
     }
 }
 function handleSubmitGo(ev) {
+    ev.preventDefault();
     try {
-        ev.preventDefault();
         console.dir(ev);
+        var otherPageURL = 'test.html';
+        window.location.href = otherPageURL;
     }
     catch (error) {
         console.error(error);

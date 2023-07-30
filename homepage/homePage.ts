@@ -1,6 +1,6 @@
 
-const playerList = [];
-const playerNum = playerList.length;
+const playerList:[] = [];
+const playerNum  = playerList.length;
 
 
 function handleInput(event) {
@@ -20,9 +20,9 @@ const formInput = document.querySelector("#name");
 const formButton = document.querySelector("#send");
 
 function handleSubmit(ev:any){
+    ev.preventDefault();
     try {
         if (playerList.length < 4) {
-        ev.preventDefault();
         console.dir(ev);
 
        let username:string = ev.target.player.value;
@@ -51,6 +51,7 @@ function handleSubmit(ev:any){
             formInput?.ariaDisabled = "true";
             alert('You have reached the maximum number of players');
         }
+        localStorage.setItem('playerList', JSON.stringify(playerList));
     } catch (error) {
         console.error(error);
     }
@@ -69,7 +70,7 @@ function renderPlayers(playersList) {
         <div class="playerRow" id="" style="background-color: black">
         <div class="details" ><h3> שחקן מספר    ${playerNum} :    ${playerDetails}</h3></div>
       </div> 
-      <button type="button" id="deletePlayer" onclick="handleDeletePlayer(event)" >
+      <button type="button" id="" onclick="handleDeletePlayer(event)" >
       delete
       </button>
       </div>`;
@@ -97,10 +98,11 @@ function renderPlayers(playersList) {
   }
 
    function handleSubmitGo(ev:any){
+    ev.preventDefault();
     try {
-        ev.preventDefault();
         console.dir(ev);
-
+        const otherPageURL = 'test.html';
+        window.location.href = otherPageURL;
     } catch (error) {
         console.error(error);
     }
