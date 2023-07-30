@@ -101,7 +101,7 @@ board.forEach(square => {
 const squares = document.querySelectorAll(".square") as NodeListOf<HTMLDivElement>
 
 let currentCard: Card | undefined
-let indexOfCurrentCard
+let indexOfCurrentCard: number
 let currentCardElement: any
 
 playerCards.forEach(element => {
@@ -140,25 +140,66 @@ function drawCard(square) {
         const currentSquare = board.find(sqr => sqr.id == square.id)
         if (!currentSquare) throw new Error('can not find current square')
         currentSquare.setOccupiedAndCardProperties(currentCard)
-        newSeria.push(currentCard)
-        console.log(newSeria);
-        
-        currentCard=undefined
+        if (!board[currentSquare.id - 1].isOccupied) {
+            const newSeria: Card[] = []
+            newSerias.push(newSeria)
+            newSerias[indexOfSerias].push(currentCard)
+            indexOfSerias++
+        } else {
+            let seriaLength = 0
+            if (board[currentSquare.id - 2].isOccupied) {
+                seriaLength++
+                if (board[currentSquare.id - 3].isOccupied) {
+                    seriaLength++
+                    if (board[currentSquare.id - 4].isOccupied) {
+                        seriaLength++
+                        if (board[currentSquare.id - 5].isOccupied) {
+                            seriaLength++
+                            if (board[currentSquare.id - 6].isOccupied) {
+                                seriaLength++
+                            }
+                        }
+                    }
+                }
+            }
+            let indexOfCurrentSeria = newSerias.findIndex(seria => seria[seriaLength].imgUrl === board[currentSquare.id - 1].imgUrl)
+            newSerias[indexOfCurrentSeria].push(currentCard)
+        }
+
+        console.log(newSerias);
+        currentCard = undefined
+        player.splice(indexOfCurrentCard,1)
+        console.log(player);
     } catch (error) {
         console.error(error)
     }
 }
-const newSeria:Card[]=[]
+let indexOfSerias = 0
+let indexOfCurrentSeria
+const newSerias: Card[][] = []
+
+function checkSumAtLeast30() {
+    try {
+        let sumOfCard = 0
+        const checking = newSerias.flat()
+        checking.forEach(card => sumOfCard += card.value)
+        return sumOfCard
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 squares.forEach(square => {
     square.addEventListener("click", function () {
         drawCard(square)
+
     })
-    square.addEventListener("mouseenter",function(){
+    square.addEventListener("mouseenter", function () {
         square.style.border = '1px solid navy'
         // square.style.background = 'rgb(0, 232, 232)'
     })
 
-    square.addEventListener("mouseout",function(){
+    square.addEventListener("mouseout", function () {
         square.style.border = ''
         // if(!square.style.backgroundImage){
         //     square.style.background=''
@@ -166,21 +207,5 @@ squares.forEach(square => {
 
     })
 
-
-    //     const rrr = currentCard.color
-    //     console.log(currentCard);
-    //     console.log(rrr);
-
-    //     square.style.backgroundSize = 'cover'
-    //     square.style.backgroundImage = rrr
-    //     // element.style.display = 'none'
-    //     // const indexOfCurrentCard = player.findIndex(card =>
-    //     //     `url("${card.imgUrl}")` == `${element.style.backgroundImage}`)
-    //     let newSeria: Card[] = []
-    //     // newSeria.push(player[indexOfCurrentCard])
-    //     // console.log(newSeria);
-
-
-    // })
 
 })

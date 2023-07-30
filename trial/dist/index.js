@@ -126,19 +126,59 @@ function drawCard(square) {
         square.style.backgroundImage = "url(" + currentCard.imgUrl + ")";
         currentCardElement = document.getElementById("" + currentCard.value + currentCard.color);
         currentCardElement.style.display = 'none';
-        var currentSquare = board.find(function (sqr) { return sqr.id == square.id; });
-        if (!currentSquare)
+        var currentSquare_1 = board.find(function (sqr) { return sqr.id == square.id; });
+        if (!currentSquare_1)
             throw new Error('can not find current square');
-        currentSquare.setOccupiedAndCardProperties(currentCard);
-        newSeria.push(currentCard);
-        console.log(newSeria);
+        currentSquare_1.setOccupiedAndCardProperties(currentCard);
+        if (!board[currentSquare_1.id - 1].isOccupied) {
+            var newSeria = [];
+            newSerias.push(newSeria);
+            newSerias[indexOfSerias].push(currentCard);
+            indexOfSerias++;
+        }
+        else {
+            var seriaLength_1 = 0;
+            if (board[currentSquare_1.id - 2].isOccupied) {
+                seriaLength_1++;
+                if (board[currentSquare_1.id - 3].isOccupied) {
+                    seriaLength_1++;
+                    if (board[currentSquare_1.id - 4].isOccupied) {
+                        seriaLength_1++;
+                        if (board[currentSquare_1.id - 5].isOccupied) {
+                            seriaLength_1++;
+                            if (board[currentSquare_1.id - 6].isOccupied) {
+                                seriaLength_1++;
+                            }
+                        }
+                    }
+                }
+            }
+            var indexOfCurrentSeria_1 = newSerias.findIndex(function (seria) { return seria[seriaLength_1].imgUrl === board[currentSquare_1.id - 1].imgUrl; });
+            newSerias[indexOfCurrentSeria_1].push(currentCard);
+        }
+        console.log(newSerias);
         currentCard = undefined;
+        player.splice(indexOfCurrentCard, 1);
+        console.log(player);
     }
     catch (error) {
         console.error(error);
     }
 }
-var newSeria = [];
+var indexOfSerias = 0;
+var indexOfCurrentSeria;
+var newSerias = [];
+function checkSumAtLeast30() {
+    try {
+        var sumOfCard_1 = 0;
+        var checking = newSerias.flat();
+        checking.forEach(function (card) { return sumOfCard_1 += card.value; });
+        return sumOfCard_1;
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
 squares.forEach(function (square) {
     square.addEventListener("click", function () {
         drawCard(square);
@@ -153,16 +193,4 @@ squares.forEach(function (square) {
         //     square.style.background=''
         // }
     });
-    //     const rrr = currentCard.color
-    //     console.log(currentCard);
-    //     console.log(rrr);
-    //     square.style.backgroundSize = 'cover'
-    //     square.style.backgroundImage = rrr
-    //     // element.style.display = 'none'
-    //     // const indexOfCurrentCard = player.findIndex(card =>
-    //     //     `url("${card.imgUrl}")` == `${element.style.backgroundImage}`)
-    //     let newSeria: Card[] = []
-    //     // newSeria.push(player[indexOfCurrentCard])
-    //     // console.log(newSeria);
-    // })
 });
