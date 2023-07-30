@@ -71,7 +71,7 @@ function handleSubmitGo(ev) {
     ev.preventDefault();
     try {
         console.dir(ev);
-        var otherPageURL = 'test.html';
+        var otherPageURL = 'set-seria.html';
         window.location.href = otherPageURL;
     }
     catch (error) {

@@ -101,7 +101,7 @@ function renderPlayers(playersList) {
     ev.preventDefault();
     try {
         console.dir(ev);
-        const otherPageURL = 'test.html';
+        const otherPageURL = 'set-seria.html';
         window.location.href = otherPageURL;
     } catch (error) {
         console.error(error);
