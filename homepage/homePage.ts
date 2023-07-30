@@ -2,6 +2,7 @@
 const playerList = [];
 const playerNum = playerList.length;
 
+
 function handleInput(event) {
   do{
       buttonState(playerList)
@@ -35,6 +36,16 @@ function handleSubmit(ev:any){
         console.log(playerList);
         }
         else {
+            ev.preventDefault();
+            console.dir(ev);
+    
+           
+            console.log(username)
+            console.log(playerList);
+            ev.target.reset();
+    
+            console.log(playerList);
+
             formInput?.removeEventListener = "true"
             formButton?.ariaDisabled = "true";
             formInput?.ariaDisabled = "true";
@@ -48,16 +59,22 @@ function renderPlayers(playersList) {
     const usersWrapper = document.querySelector(`#usersWrapper`);
      
      const playerNum = playerList.length;
+     
      console.log(playerList)
      console.log(playerNum);
      const playerDetails = playerList[playerList.length - 1];
      if (!playerDetails) throw new Error(`Player's details not found`);
     if (usersWrapper) {
-        usersWrapper.innerHTML += `<div class="playerRow" id="" style="background-color: black">
+        usersWrapper.innerHTML += `<div class="row" id="" >
+        <div class="playerRow" id="" style="background-color: black">
         <div class="details" ><h3> שחקן מספר    ${playerNum} :    ${playerDetails}</h3></div>
+      </div> 
+      <button type="button" id="deletePlayer" onclick="handleDeletePlayer(event)" >
+      delete
+      </button>
       </div>`;
+      
     }
-   
     
     if (playerNum > 1){
         submitWrapper.innerHTML ='';
@@ -66,6 +83,17 @@ function renderPlayers(playersList) {
         <input type="submit" id="go" value="!קדימה" />
         </form> `;
     }
+  }
+
+  function handleDeletePlayer(playerNum) {
+    try {
+        playerList.splice(playerNum,1);
+       console.log(playerList)
+       renderPlayers
+    } catch (error) {
+        console.error(error);
+    }
+
   }
 
    function handleSubmitGo(ev:any){
@@ -79,7 +107,6 @@ function renderPlayers(playersList) {
 }
 
 
-   
    
    function buttonState(playerList){
     if (playerList.length === 4){
