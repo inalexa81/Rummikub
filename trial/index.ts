@@ -7,6 +7,7 @@ const player: Card[] = [
     new Card(1, 'black', './imgs/1black.png', false),
     new Card(1, 'blue', './imgs/1blue.png', false),
     new Card(1, 'red', './imgs/1red.png', false),
+    new Card(1, 'red', './imgs/1red.png', false),
     new Card(1, 'yellow', './imgs/1yellow.png', false),
     new Card(2, 'black', './imgs/2black.png', false),
     new Card(2, 'blue', './imgs/2blue.png', false),
@@ -49,134 +50,40 @@ player.forEach(card => {
 })
 const playerCards = document.querySelectorAll(".card") as NodeListOf<HTMLDivElement>
 
-const board: Square[] = [
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-]
-const boardElement = document.querySelector('#board') as HTMLDivElement
-
-board.forEach(square => {
-    boardElement.innerHTML += `<div class="square" id="${square.id}"></div>`
-
-})
 
 const squares = document.querySelectorAll(".square") as NodeListOf<HTMLDivElement>
 
+const newSerias: Card[][] = []
+const currentSeria: Card[] = []
 let currentCard: Card | undefined
 let indexOfCurrentCard: number
-let currentCardElement: any
 
 playerCards.forEach(element => {
     element.style.borderRadius = '7px'
-    element.addEventListener("mousedown", function () {
-        element.style.position = 'fixed;'
+
+    const addCard = element.addEventListener("click", function () {
         indexOfCurrentCard = player.findIndex(card => `${card.value}${card.color}` === element.id)
         currentCard = player[indexOfCurrentCard]
         if (currentCard !== undefined) {
+            if (element.style.bottom === '30px') {
+                element.style.bottom = '0px'
+                element.style.boxShadow = ''
+                const indexOfCard = currentSeria.findIndex(card => `${card.value}${card.color}` === element.id)
+                currentSeria.splice(indexOfCard, 1)
 
-            document.addEventListener("mousemove", function (ev) {
-                element.style.position = "fixed;"
-                let x = ev.clientX
-                let y = ev.clientY
-                let xx = element.clientLeft
-                element.style.left = `${x - 400}px`
-                element.style.top = `${y - 400}px`
+            } else {
+                element.style.bottom = '30px'
+                element.style.boxShadow = '0px 0px 5px 3px yellow'
+                currentSeria.push(currentCard)
 
+            }
 
-            })
+            console.log(currentSeria);
         }
-
     })
-
-
 })
 
-function drawCard(square) {
-    try {
-        if (currentCard === undefined) throw new Error('can not find current card')
 
-        square.style.backgroundSize = 'cover'
-        square.style.backgroundImage = `url(${currentCard.imgUrl})`
-        currentCardElement = document.getElementById(`${currentCard.value}${currentCard.color}`)
-        currentCardElement.style.display = 'none'
-        const currentSquare = board.find(sqr => sqr.id == square.id)
-        if (!currentSquare) throw new Error('can not find current square')
-        currentSquare.setOccupiedAndCardProperties(currentCard)
-        if (!board[currentSquare.id - 1].isOccupied) {
-            const newSeria: Card[] = []
-            newSerias.push(newSeria)
-            newSerias[indexOfSerias].push(currentCard)
-            indexOfSerias++
-        } else {
-            let seriaLength = 0
-            if (board[currentSquare.id - 2].isOccupied) {
-                seriaLength++
-                if (board[currentSquare.id - 3].isOccupied) {
-                    seriaLength++
-                    if (board[currentSquare.id - 4].isOccupied) {
-                        seriaLength++
-                        if (board[currentSquare.id - 5].isOccupied) {
-                            seriaLength++
-                            if (board[currentSquare.id - 6].isOccupied) {
-                                seriaLength++
-                            }
-                        }
-                    }
-                }
-            }
-            let indexOfCurrentSeria = newSerias.findIndex(seria => seria[seriaLength].imgUrl === board[currentSquare.id - 1].imgUrl)
-            newSerias[indexOfCurrentSeria].push(currentCard)
-        }
-
-        console.log(newSerias);
-        currentCard = undefined
-        player.splice(indexOfCurrentCard,1)
-        console.log(player);
-    } catch (error) {
-        console.error(error)
-    }
-}
-let indexOfSerias = 0
-let indexOfCurrentSeria
-const newSerias: Card[][] = []
 
 function checkSumAtLeast30() {
     try {
@@ -188,24 +95,3 @@ function checkSumAtLeast30() {
         console.error(error)
     }
 }
-
-squares.forEach(square => {
-    square.addEventListener("click", function () {
-        drawCard(square)
-
-    })
-    square.addEventListener("mouseenter", function () {
-        square.style.border = '1px solid navy'
-        // square.style.background = 'rgb(0, 232, 232)'
-    })
-
-    square.addEventListener("mouseout", function () {
-        square.style.border = ''
-        // if(!square.style.backgroundImage){
-        //     square.style.background=''
-        // }
-
-    })
-
-
-})

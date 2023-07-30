@@ -19,7 +19,7 @@ body {
   justify-content: center;
 }
 #board .square {
-  transition: all 0.5s;
+  transition: all 0.2s;
 }
 
 #player {

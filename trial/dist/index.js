@@ -11,6 +11,7 @@ var player = [
     new Card(1, 'black', './imgs/1black.png', false),
     new Card(1, 'blue', './imgs/1blue.png', false),
     new Card(1, 'red', './imgs/1red.png', false),
+    new Card(1, 'red', './imgs/1red.png', false),
     new Card(1, 'yellow', './imgs/1yellow.png', false),
     new Card(2, 'black', './imgs/2black.png', false),
     new Card(2, 'blue', './imgs/2blue.png', false),
@@ -50,124 +51,32 @@ player.forEach(function (card) {
     playerElement.innerHTML += "<div class=\"card\" id = \"" + card.value + card.color + "\" style=\"background-image: url('" + card.imgUrl + "');\"></div>";
 });
 var playerCards = document.querySelectorAll(".card");
-var board = [
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-    new Square(false),
-];
-var boardElement = document.querySelector('#board');
-board.forEach(function (square) {
-    boardElement.innerHTML += "<div class=\"square\" id=\"" + square.id + "\"></div>";
-});
 var squares = document.querySelectorAll(".square");
+var newSerias = [];
+var currentSeria = [];
 var currentCard;
 var indexOfCurrentCard;
-var currentCardElement;
 playerCards.forEach(function (element) {
     element.style.borderRadius = '7px';
-    element.addEventListener("mousedown", function () {
-        element.style.position = 'fixed;';
+    var addCard = element.addEventListener("click", function () {
         indexOfCurrentCard = player.findIndex(function (card) { return "" + card.value + card.color === element.id; });
         currentCard = player[indexOfCurrentCard];
         if (currentCard !== undefined) {
-            document.addEventListener("mousemove", function (ev) {
-                element.style.position = "fixed;";
-                var x = ev.clientX;
-                var y = ev.clientY;
-                var xx = element.clientLeft;
-                element.style.left = x - 400 + "px";
-                element.style.top = y - 400 + "px";
-            });
+            if (element.style.bottom === '30px') {
+                element.style.bottom = '0px';
+                element.style.boxShadow = '';
+                var indexOfCard = currentSeria.findIndex(function (card) { return "" + card.value + card.color === element.id; });
+                currentSeria.splice(indexOfCard, 1);
+            }
+            else {
+                element.style.bottom = '30px';
+                element.style.boxShadow = '0px 0px 5px 3px yellow';
+                currentSeria.push(currentCard);
+            }
+            console.log(currentSeria);
         }
     });
 });
-function drawCard(square) {
-    try {
-        if (currentCard === undefined)
-            throw new Error('can not find current card');
-        square.style.backgroundSize = 'cover';
-        square.style.backgroundImage = "url(" + currentCard.imgUrl + ")";
-        currentCardElement = document.getElementById("" + currentCard.value + currentCard.color);
-        currentCardElement.style.display = 'none';
-        var currentSquare_1 = board.find(function (sqr) { return sqr.id == square.id; });
-        if (!currentSquare_1)
-            throw new Error('can not find current square');
-        currentSquare_1.setOccupiedAndCardProperties(currentCard);
-        if (!board[currentSquare_1.id - 1].isOccupied) {
-            var newSeria = [];
-            newSerias.push(newSeria);
-            newSerias[indexOfSerias].push(currentCard);
-            indexOfSerias++;
-        }
-        else {
-            var seriaLength_1 = 0;
-            if (board[currentSquare_1.id - 2].isOccupied) {
-                seriaLength_1++;
-                if (board[currentSquare_1.id - 3].isOccupied) {
-                    seriaLength_1++;
-                    if (board[currentSquare_1.id - 4].isOccupied) {
-                        seriaLength_1++;
-                        if (board[currentSquare_1.id - 5].isOccupied) {
-                            seriaLength_1++;
-                            if (board[currentSquare_1.id - 6].isOccupied) {
-                                seriaLength_1++;
-                            }
-                        }
-                    }
-                }
-            }
-            var indexOfCurrentSeria_1 = newSerias.findIndex(function (seria) { return seria[seriaLength_1].imgUrl === board[currentSquare_1.id - 1].imgUrl; });
-            newSerias[indexOfCurrentSeria_1].push(currentCard);
-        }
-        console.log(newSerias);
-        currentCard = undefined;
-        player.splice(indexOfCurrentCard, 1);
-        console.log(player);
-    }
-    catch (error) {
-        console.error(error);
-    }
-}
-var indexOfSerias = 0;
-var indexOfCurrentSeria;
-var newSerias = [];
 function checkSumAtLeast30() {
     try {
         var sumOfCard_1 = 0;
@@ -179,18 +88,3 @@ function checkSumAtLeast30() {
         console.error(error);
     }
 }
-squares.forEach(function (square) {
-    square.addEventListener("click", function () {
-        drawCard(square);
-    });
-    square.addEventListener("mouseenter", function () {
-        square.style.border = '1px solid navy';
-        // square.style.background = 'rgb(0, 232, 232)'
-    });
-    square.addEventListener("mouseout", function () {
-        square.style.border = '';
-        // if(!square.style.backgroundImage){
-        //     square.style.background=''
-        // }
-    });
-});
