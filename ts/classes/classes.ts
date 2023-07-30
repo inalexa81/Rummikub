@@ -6,7 +6,11 @@ class Card {
 
 class Player {
     cards: Card[] = [];
-    constructor(public name: string) { }
+    firstDrop: boolean;
+    constructor(public name: string, firstDrop?: boolean | undefined) {
+        this.firstDrop = (firstDrop !== undefined) ? firstDrop : false;
+
+     }
 }
 
 
@@ -16,14 +20,23 @@ const gameDeck: Card[] | undefined = getNewDeck();
 class Game {
     gameDeck: Card[] | undefined;
     startIndx: number;
+    currIndx: number;
     players: {player:Player, score:number}[]  = [];
-    constructor(player1: Player,player2: Player,player3?: Player,player4?: Player) {
+    constructor(player1: Player,
+        player2: Player,
+        player3?: Player,
+        player4?: Player,
+        startIndx?: number | undefined,
+        currIndx?: number | undefined) {
         debugger;
         this.gameDeck = getNewDeck();
         this.players.push({ player:player1, score:0});
         this.players.push({ player:player2, score:0});
         if (player3 !== undefined) this.players.push({ player:player3, score:0});
-        if (player4 !== undefined) this.players.push({ player:player4, score:0});
+        if (player4 !== undefined) this.players.push({ player: player4, score: 0 });
+        this.startIndx = (startIndx !== undefined) ? startIndx : this.startIndx;
+        this.currIndx = (currIndx !== undefined) ? currIndx : this.currIndx;
+
     }
 
     pickBigginer() {
