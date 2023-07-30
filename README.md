@@ -1,4 +1,2 @@
 # Rummikub
 Rummikub game
-
-
