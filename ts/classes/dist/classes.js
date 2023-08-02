@@ -41,43 +41,45 @@ var Game = /** @class */ (function () {
         this.startIndx = (startIndx !== undefined) ? startIndx : this.startIndx;
         this.currIndx = (currIndx !== undefined) ? currIndx : this.currIndx;
     }
-    Game.prototype.pickBigginer = function () {
+    Game.prototype.setPlayersForDraw = function (playersPick) {
         var _this = this;
+        try {
+            this.players.forEach(function (p) {
+                playersPick.push({ player: __assign({}, p.player), card: _this.drawnCard() });
+            });
+        }
+        catch (error) {
+            console.error(error);
+        }
+    };
+    Game.prototype.returnCardToDeck = function (playersPick) {
+        var _this = this;
+        try {
+            var cards = playersPick.map(function (p) { return p.card; });
+            cards.forEach(function (card) {
+                var _a;
+                (_a = _this.gameDeck) === null || _a === void 0 ? void 0 : _a.push(card);
+            });
+        }
+        catch (error) {
+            console.error(error);
+        }
+    };
+    Game.prototype.pickBigginer = function () {
         try {
             if (this.gameDeck === undefined)
                 throw new Error("No more Cards to deal");
             var playersPick_1 = [];
-            this.players.forEach(function (p) {
-                playersPick_1.push({ player: __assign({}, p.player), card: _this.drawnCard() });
-            });
+            this.setPlayersForDraw(playersPick_1);
             // Sort the playersPick array based on card value (ascending order)
-            playersPick_1.sort(function (a, b) {
-                if (a.card && b.card) {
-                    if (a.card.isJoker)
-                        return 1;
-                    if (b.card.isJoker)
-                        return 1;
-                    return b.card.value - a.card.value;
-                }
-                // Move any undefined card to the end (optional)
-                return a.card ? -1 : 1;
-            });
+            playersPick_1.sort(comparePlayer);
             this.startIndx = this.players.findIndex(function (p) { return p.player.name === playersPick_1[0].player.name; });
             alert(playersPick_1[0].player.name.toUpperCase() + " you got the higest, you go first");
             console.log(playersPick_1);
-            playersPick_1.forEach(function (p) {
-                var _a;
-                debugger;
-                var card = __assign({}, p);
-                var indx = playersPick_1.findIndex(function (player) { return player.player.name === p.player.name; });
-                // playersPick.splice(indx,1);
-                if (card === undefined)
-                    throw new Error("");
-                (_a = _this.gameDeck) === null || _a === void 0 ? void 0 : _a.push(card === null || card === void 0 ? void 0 : card.card);
-            });
-            // Now the playersPick array is sorted based on card value
-            console.log(playersPick_1);
-            console.log(this.gameDeck);
+            this.returnCardToDeck(playersPick_1);
+            // // Now the playersPick array is sorted based on card value
+            // console.log(playersPick);
+            // console.log(this.gameDeck);
         }
         catch (error) {
             console.error(error);
@@ -106,3 +108,15 @@ var Game = /** @class */ (function () {
     };
     return Game;
 }());
+function comparePlayer(a, b) {
+    if (!a.card && !b.card) {
+        return 0; // Both cards are undefined, consider them equal
+    }
+    if (!a.card) {
+        return -1; // Only a's card is undefined, place it before b
+    }
+    if (!b.card) {
+        return 1; // Only b's card is undefined, place it before a
+    }
+    return a.card.value - b.card.value; // Sorting by card value
+}

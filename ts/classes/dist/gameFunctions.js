@@ -12,7 +12,7 @@ function computeScore(players) {
         players.forEach(function (player) {
             var initialValue = 0;
             var sumWithInitial = player.player.cards.reduce(function (accumulator, currentValue) { return accumulator + currentValue.value; }, initialValue);
-            player.score -= initialValue;
+            player.score -= initialValue; // winner new to add (+) score
         });
     }
     catch (error) {
@@ -124,7 +124,7 @@ function checkSerie(cards) {
         console.error(error);
     }
 }
-function compare(a, b) {
+function compareCards(a, b) {
     if (a.value < b.value) {
         return -1;
     }
@@ -142,7 +142,7 @@ function addToExist(serie, cardToAdd) {
         else {
             if (checkAddToSerial(serie, cardToAdd)) {
                 serie.push(cardToAdd);
-                serie.sort(compare);
+                serie.sort(compareCards);
             }
         }
     }

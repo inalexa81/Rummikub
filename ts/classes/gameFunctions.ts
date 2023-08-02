@@ -7,7 +7,7 @@ function computeScore(players: { player: Player, score: number }[]) {
                 (accumulator, currentValue) => accumulator + currentValue.value,
                 initialValue
             );
-            player.score -= initialValue;
+            player.score -= initialValue; // winner new to add (+) score
         });
     } catch (error) {
         console.error(error)
@@ -32,11 +32,11 @@ function minimumSum(cardsToBoard: Card[]): boolean | undefined {
 function checkAddToSerial(cards: Card[], card: Card): boolean | undefined {
     try {
         if (!cards || !card) throw new Error("Missing card");
-        const first = (cards[0].value - 1 === card.value); 
+        const first = (cards[0].value - 1 === card.value);
         const last = (cards[cards.length - 1].value + 1 === card.value);
         const color = (cards[0].color === card.color);
         return (color && (last || first))
-        
+
     } catch (error) {
         console.error(error)
     }
@@ -119,7 +119,7 @@ function checkSerie(cards: Card[]): boolean | undefined {
     }
 }
 
-function compare(a: Card, b: Card) {    // sorting by cards value
+function compareCards(a: Card, b: Card) {    // sorting by cards value
     if (a.value < b.value) {
         return -1;
     }
@@ -132,11 +132,11 @@ function addToExist(serie: Card[], cardToAdd: Card) {  // when adding card to an
         debugger;
         if (serie === undefined) throw new Error("No serie cards");
         if (cardToAdd === undefined) throw new Error("No card to add");
-        if (checkAddToSerie(serie, cardToAdd))serie.push(cardToAdd);
+        if (checkAddToSerie(serie, cardToAdd)) serie.push(cardToAdd);
         else {
             if (checkAddToSerial(serie, cardToAdd)) {
                 serie.push(cardToAdd);
-                serie.sort(compare);
+                serie.sort(compareCards);
             }
         }
     } catch (error) {
