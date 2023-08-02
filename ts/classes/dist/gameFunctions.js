@@ -1,13 +1,18 @@
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 function computeScore(players) {
     try {
         if (!players)
             throw new Error("Game element missing");
         players.forEach(function (player) {
-            var sum = 0;
-            player.player.cards.forEach(function (card) {
-                sum += card.value;
-            });
-            player.score -= sum;
+            var initialValue = 0;
+            var sumWithInitial = player.player.cards.reduce(function (accumulator, currentValue) { return accumulator + currentValue.value; }, initialValue);
+            player.score -= initialValue; // winner new to add (+) score
         });
     }
     catch (error) {
@@ -19,43 +24,68 @@ function minimumSum(cardsToBoard) {
     try {
         if (cardsToBoard === undefined || !cardsToBoard)
             throw new Error("No cards");
-        var sum_1 = 0;
-        cardsToBoard.forEach(function (card) {
-            sum_1 += card.value;
-        });
-        return sum_1 < 30 ? false : true;
+        var initialValue = 0;
+        var sumWithInitial = cardsToBoard.reduce(function (accumulator, currentValue) { return accumulator + currentValue.value; }, initialValue);
+        return initialValue < 30 ? false : true;
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+function checkAddToSerial(cards, card) {
+    try {
+        if (!cards || !card)
+            throw new Error("Missing card");
+        var first = (cards[0].value - 1 === card.value);
+        var last = (cards[cards.length - 1].value + 1 === card.value);
+        var color = (cards[0].color === card.color);
+        return (color && (last || first));
     }
     catch (error) {
         console.error(error);
     }
 }
 // 1,2,3.. 
-function checkSerial(cards, card) {
+function checkSerial(cards) {
     try {
-        if (cards === undefined || !cards)
+        if (!cards)
             throw new Error("No cards");
         if (cards.length < 3) {
             alert("Minimum three cards");
             return false;
         }
-        if (!card) {
-            for (var i = 0; i < cards.length - 1; i++) {
-                if ((cards[i].value + 1) !== cards[i + 1].value)
-                    return false;
-            }
-        }
-        else {
-            if (cards[0].value - 1 !== card.value && cards[cards.length - 1].value + 1 !== card.value)
-                return false;
-        }
-        return true;
+        var isSequential = cards.slice(0, -1).every(function (card, index) { return (card.value + 1) === cards[index + 1].value; });
+        var sameColor = checkColors(cards);
+        return isSequential && sameColor;
     }
     catch (error) {
         console.error(error);
     }
 }
 // same color checking
-function checkColors(cards, card) {
+function checkColors(cards) {
+    try {
+        if (!cards)
+            throw new Error("No cards");
+        var colors = new Set(cards.map(function (card) { return card.color; }));
+        return colors.size === 1;
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+//only one show of each color
+function diffColors(cards) {
+    try {
+        var colors = new Set(cards.map(function (card) { return card.color; }));
+        return (colors.size === 4 || colors.size === 3);
+    }
+    catch (error) {
+        console.error(error);
+    }
+    // }
+}
+function checkAddToSerie(cards, card) {
     try {
         if (cards === undefined || !cards)
             throw new Error("No cards");
@@ -63,15 +93,14 @@ function checkColors(cards, card) {
             alert("Minimum three cards");
             return false;
         }
-        if (card === undefined || !card) {
-            for (var i = 0; i < cards.length - 1; i++) {
-                if (cards[i].color !== cards[i + 1].color)
-                    return false;
-            }
+        if (cards.findIndex(function (c) { return c.value === card.value; }) === -1) {
+            alert(card.value + " " + card.color + " Not part of serie, different number");
+            return false;
         }
-        else {
-            if (cards[0].color !== card.color)
-                return false;
+        var concatenatedCards = __spreadArrays(cards, [card]);
+        if (!diffColors(concatenatedCards)) {
+            alert(card.value + " " + card.color + " Can't add, already exist");
+            return false;
         }
         return true;
     }
@@ -80,7 +109,7 @@ function checkColors(cards, card) {
     }
 }
 // 1red, 1yellow, 1blue, 1black 
-function checkserie(cards, card) {
+function checkSerie(cards) {
     try {
         if (cards === undefined || !cards)
             throw new Error("No cards");
@@ -88,55 +117,14 @@ function checkserie(cards, card) {
             alert("Minimum three cards");
             return false;
         }
-        if (card === undefined || !card) {
-            if (cards.length > 3) {
-                alert("Max four cards, can not add");
-                return false;
-            }
-            var colors = [{ color: "red", set: true },
-                { color: "blue", set: true },
-                { color: "yellow", set: true },
-                { color: "black", set: true }];
-            var val = cards[0].value;
-            var _loop_1 = function (i) {
-                var color = colors.find(function (c) { return c.color === cards[i].color; });
-                if (color === undefined)
-                    throw new Error("No such color");
-                if (val !== cards[i].value) {
-                    alert(cards[i].value + " " + cards[i].color + " not part of serie, different number");
-                    return { value: false };
-                }
-                if (!color.set) {
-                    alert(cards[i].value + " " + cards[i].color + " already exist, can not add");
-                    return { value: false };
-                }
-                color.set = false;
-            };
-            for (var i = 0; i < cards.length; i++) {
-                var state_1 = _loop_1(i);
-                if (typeof state_1 === "object")
-                    return state_1.value;
-            }
-        }
-        else {
-            for (var i = 0; i < cards.length; i++) {
-                if (cards[i].color === card.color) {
-                    alert(card.value + " " + card.color + " already exist, can not add");
-                    return false;
-                }
-                if (cards[i].value !== card.value) {
-                    alert(card.value + " " + card.color + " not part of serie, different number");
-                    return false;
-                }
-            }
-        }
-        return true;
+        var values = new Set(cards.map(function (card) { return card.value; }));
+        return (diffColors(cards) && (values.size === 1));
     }
     catch (error) {
         console.error(error);
     }
 }
-function compare(a, b) {
+function compareCards(a, b) {
     if (a.value < b.value) {
         return -1;
     }
@@ -149,15 +137,12 @@ function addToExist(serie, cardToAdd) {
             throw new Error("No serie cards");
         if (cardToAdd === undefined)
             throw new Error("No card to add");
-        if (checkserie(serie, cardToAdd)) {
+        if (checkAddToSerie(serie, cardToAdd))
             serie.push(cardToAdd);
-            console.dir(serie);
-        }
         else {
-            if (checkColors(serie, cardToAdd) && checkSerial(serie, cardToAdd)) {
+            if (checkAddToSerial(serie, cardToAdd)) {
                 serie.push(cardToAdd);
-                serie.sort(compare);
-                console.dir(serie);
+                serie.sort(compareCards);
             }
         }
     }

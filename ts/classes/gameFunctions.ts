@@ -2,11 +2,12 @@ function computeScore(players: { player: Player, score: number }[]) {
     try {
         if (!players) throw new Error("Game element missing");
         players.forEach(player => {
-            let sum: number = 0;
-            player.player.cards.forEach((card) => {
-                sum += card.value;
-            });
-            player.score -= sum;
+            const initialValue = 0;
+            const sumWithInitial = player.player.cards.reduce(
+                (accumulator, currentValue) => accumulator + currentValue.value,
+                initialValue
+            );
+            player.score -= initialValue; // winner new to add (+) score
         });
     } catch (error) {
         console.error(error)
@@ -17,115 +18,108 @@ function computeScore(players: { player: Player, score: number }[]) {
 function minimumSum(cardsToBoard: Card[]): boolean | undefined {
     try {
         if (cardsToBoard === undefined || !cardsToBoard) throw new Error("No cards");
-        let sum = 0;
-        cardsToBoard.forEach(card => {
-            sum += card.value;
-        })
-        return sum < 30 ? false : true;
+        const initialValue = 0;
+        const sumWithInitial = cardsToBoard.reduce(
+            (accumulator, currentValue) => accumulator + currentValue.value,
+            initialValue
+        );
+        return initialValue < 30 ? false : true;
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+function checkAddToSerial(cards: Card[], card: Card): boolean | undefined {
+    try {
+        if (!cards || !card) throw new Error("Missing card");
+        const first = (cards[0].value - 1 === card.value);
+        const last = (cards[cards.length - 1].value + 1 === card.value);
+        const color = (cards[0].color === card.color);
+        return (color && (last || first))
+
     } catch (error) {
         console.error(error)
     }
 }
 
 // 1,2,3.. 
-function checkSerial(cards: Card[], card: Card | null): boolean | undefined {
+function checkSerial(cards: Card[]): boolean | undefined {
     try {
-        if (cards === undefined || !cards) throw new Error("No cards");
+        if (!cards) throw new Error("No cards");
         if (cards.length < 3) {
             alert("Minimum three cards")
             return false;
         }
-
-        if (!card) {
-            for (let i = 0; i < cards.length - 1; i++) {
-                if ((cards[i].value + 1) !== cards[i + 1].value) return false;
-            }
-        }
-        else {
-            if (cards[0].value - 1 !== card.value && cards[cards.length - 1].value + 1 !== card.value)
-                return false;
-        }
-        return true;
+        const isSequential = cards.slice(0, -1).every((card, index) => (card.value + 1) === cards[index + 1].value);
+        const sameColor = checkColors(cards);
+        return isSequential && sameColor;
     } catch (error) {
         console.error(error)
     }
 }
 
 // same color checking
-function checkColors(cards: Card[], card: Card | null): boolean | undefined {
+function checkColors(cards: Card[]): boolean | undefined {
+    try {
+        if (!cards) throw new Error("No cards");
+        const colors = new Set(cards.map((card) => card.color));
+        return colors.size === 1
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+//only one show of each color
+function diffColors(cards: Card[]) {
+    try {
+        const colors = new Set(cards.map((card) => card.color));
+        return (colors.size === 4 || colors.size === 3)
+
+    } catch (error) {
+        console.error(error);
+    }
+    // }
+}
+
+
+function checkAddToSerie(cards: Card[], card: Card): boolean | undefined {
     try {
         if (cards === undefined || !cards) throw new Error("No cards");
         if (cards.length < 3) {
             alert("Minimum three cards")
             return false;
         }
-        if (card === undefined || !card) {
-            for (let i = 0; i < cards.length - 1; i++) {
-                if (cards[i].color !== cards[i + 1].color) return false;
-            }
+        if (cards.findIndex(c => c.value === card.value) === -1) {
+            alert(`${card.value} ${card.color} Not part of serie, different number`);
+            return false;
         }
-        else {
-            if (cards[0].color !== card.color)
-                return false;
+        const concatenatedCards = [...cards, card];
+        if (!diffColors(concatenatedCards)) {
+            alert(`${card.value} ${card.color} Can't add, already exist`);
+            return false;
         }
         return true;
     } catch (error) {
         console.error(error)
     }
 }
-
 
 // 1red, 1yellow, 1blue, 1black 
-function checkserie(cards: Card[], card: Card | null): boolean | undefined {
+function checkSerie(cards: Card[]): boolean | undefined {
     try {
         if (cards === undefined || !cards) throw new Error("No cards");
         if (cards.length < 3) {
             alert("Minimum three cards")
             return false;
         }
-        if (card === undefined || !card) {
-            if (cards.length > 3) {
-                alert("Max four cards, can not add")
-                return false;
-            }
-            const colors: { color: string, set: boolean }[] = [{ color: "red", set: true },
-            { color: "blue", set: true },
-            { color: "yellow", set: true },
-            { color: "black", set: true }]
-            const val = cards[0].value;
-            for (let i = 0; i < cards.length; i++) {
-                const color = colors.find(c => c.color === cards[i].color)
-                if (color === undefined) throw new Error("No such color");
-                if (val !== cards[i].value) {
-                    alert(`${cards[i].value} ${cards[i].color} not part of serie, different number`);
-                    return false;
-                }
-                if (!color.set) {
-                    alert(`${cards[i].value} ${cards[i].color} already exist, can not add`);
-                    return false;
-                }
-                color.set = false;
-            }
-        }
-        else {
-            for (let i = 0; i < cards.length; i++) {
-                if (cards[i].color === card.color) {
-                    alert(`${card.value} ${card.color} already exist, can not add`);
-                    return false;
-                }
-                if (cards[i].value !== card.value) {
-                    alert(`${card.value} ${card.color} not part of serie, different number`);
-                    return false;
-                }
-            }
-        }
-        return true;
+        const values = new Set(cards.map((card) => card.value));
+        return (diffColors(cards) && (values.size === 1));
     } catch (error) {
         console.error(error)
     }
 }
 
-function compare(a: Card, b: Card) {    // sorting by cards value
+function compareCards(a: Card, b: Card) {    // sorting by cards value
     if (a.value < b.value) {
         return -1;
     }
@@ -138,15 +132,11 @@ function addToExist(serie: Card[], cardToAdd: Card) {  // when adding card to an
         debugger;
         if (serie === undefined) throw new Error("No serie cards");
         if (cardToAdd === undefined) throw new Error("No card to add");
-        if (checkserie(serie, cardToAdd)) {
-            serie.push(cardToAdd);
-            console.dir(serie)
-        }
+        if (checkAddToSerie(serie, cardToAdd)) serie.push(cardToAdd);
         else {
-            if (checkColors(serie, cardToAdd) && checkSerial(serie, cardToAdd)) {
+            if (checkAddToSerial(serie, cardToAdd)) {
                 serie.push(cardToAdd);
-                serie.sort(compare);
-                console.dir(serie)
+                serie.sort(compareCards);
             }
         }
     } catch (error) {
@@ -178,7 +168,6 @@ function getPlayersFromStorage(): Game | undefined {
         const storageArray = JSON.parse(storageString);
         //convert array of objects to array of Card | Player
         const players: Game = storageArray.map((game: Game) => {
-
             return new Game(
                 game.players[0].player,
                 game.players[1].player,
@@ -196,7 +185,7 @@ function getPlayersFromStorage(): Game | undefined {
 
 
 // input - card:joker, newVal: card.value of replaced card
-function setJokerVal(card: Card, newVal:number) {
+function setJokerVal(card: Card, newVal: number) {
     try {
         if (card === undefined || !card) throw new Error("Missing joker");
         card.value = newVal;
