@@ -168,7 +168,6 @@ function getPlayersFromStorage(): Game | undefined {
         const storageArray = JSON.parse(storageString);
         //convert array of objects to array of Card | Player
         const players: Game = storageArray.map((game: Game) => {
-
             return new Game(
                 game.players[0].player,
                 game.players[1].player,
