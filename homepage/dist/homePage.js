@@ -16,9 +16,11 @@ var Card = /** @class */ (function () {
     return Card;
 }());
 var playerList = getplayersListFromStorage();
+renderPlayers(document.querySelector("#usersWrapper"));
 function getplayersListFromStorage() {
     try {
-        var storageString = localStorage.getItem("playersList");
+        debugger;
+        var storageString = localStorage.getItem("playerList");
         if (!storageString)
             throw new Error("No such name in local storage");
         //convert string to array of objects
@@ -31,21 +33,27 @@ function getplayersListFromStorage() {
     }
     catch (error) {
         console.error(error);
+        return [];
     }
 }
-function handleInput(event) {
-    do {
-        debugger;
-        buttonState(playerList.length);
-        var root = document.querySelector('#root');
-    } while (playerNum > 5);
-}
-var formInput = document.querySelector("#name");
-var formButton = document.querySelector("#send");
+// function handleInput(event) {
+//     do {
+//         debugger;
+//         buttonState(playerList.length)
+//         const root = document.querySelector('#root');
+//     }
+//     while (playerNum > 5);
+// }
 function handleSubmit(ev) {
-    ev.preventDefault();
-    debugger;
     try {
+        debugger;
+        ev.preventDefault();
+        var formButton = document.querySelector("#send");
+        var formInput = document.querySelector("#name");
+        if (!formButton)
+            throw new Error("No send button");
+        if (!formInput)
+            throw new Error("No #name");
         if (playerList.length < 4) {
             var username = ev.target.player.value;
             var player = new Player(username);
@@ -55,9 +63,9 @@ function handleSubmit(ev) {
         }
         else {
             ev.target.reset();
-            formInput === null || formInput === void 0 ? void 0 : formInput.removeEventListener = "true";
-            formButton === null || formButton === void 0 ? void 0 : formButton.ariaDisabled = "true";
-            formInput === null || formInput === void 0 ? void 0 : formInput.ariaDisabled = "true";
+            // formInput.removeEventListener = "true"
+            formButton.ariaDisabled = "true";
+            formInput.ariaDisabled = "true";
             alert('You have reached the maximum number of players');
         }
         localStorage.setItem('playerList', JSON.stringify(playerList));
@@ -110,7 +118,7 @@ function renderPlayers(usersWrapper) {
         usersWrapper.innerHTML = playerList.map(function (p, index) {
             return "<div class=\"row\" id=\"\" >\n                <div class=\"playerRow\" id=\"\" style=\"background-color: black\">\n                <div class=\"details\" ><h3> \u05E9\u05D7\u05E7\u05DF \u05DE\u05E1\u05E4\u05E8    " + index + " :    " + p.name + "</h3></div>\n              </div> \n              <button type=\"button\" id=\"\" onclick=\"handleDeletePlayer(event)\" >\n              delete\n              </button>\n              </div>";
         }).join();
-        if (playerNum > 1) {
+        if (playerList.length > 1) {
             renderGoBtn(document.querySelector("#submitWrapper"));
         }
     }
@@ -160,6 +168,7 @@ function handleSubmitGo(ev) {
 // }
 function buttonState(set) {
     try {
+        var formButton = document.querySelector("#send");
         if (!formButton)
             throw new Error("no button");
         formButton.ariaDisabled = set;

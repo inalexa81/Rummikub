@@ -13,11 +13,12 @@ class Card {
 }
 
 const playerList: Player[] = getplayersListFromStorage();
+renderPlayers(document.querySelector("#usersWrapper"));
 
-function getplayersListFromStorage(): Player[]{
+function getplayersListFromStorage(): Player[] {
     try {
-
-        const storageString = localStorage.getItem(`playersList`);
+        debugger;
+        const storageString = localStorage.getItem(`playerList`);
         if (!storageString) throw new Error("No such name in local storage");
         //convert string to array of objects
         const storageArray = JSON.parse(storageString);
@@ -31,29 +32,32 @@ function getplayersListFromStorage(): Player[]{
 
     } catch (error) {
         console.error(error)
+        return [];
     }
 
 }
 
-function handleInput(event) {
-    do {
-        debugger;
-        buttonState(playerList.length)
-        const root = document.querySelector('#root');
-    }
-    while (playerNum > 5);
+// function handleInput(event) {
+//     do {
+//         debugger;
+//         buttonState(playerList.length)
+//         const root = document.querySelector('#root');
+//     }
+//     while (playerNum > 5);
 
-}
+// }
 
 
-const formInput = document.querySelector("#name");
 
-const formButton = document.querySelector("#send");
 
 function handleSubmit(ev: any) {
-    ev.preventDefault();
-    debugger;
     try {
+        debugger;
+        ev.preventDefault();
+        const formButton = document.querySelector("#send");
+        const formInput = document.querySelector("#name");
+        if (!formButton) throw new Error("No send button");
+        if (!formInput) throw new Error("No #name");
         if (playerList.length < 4) {
             let username: string = ev.target.player.value;
             const player = new Player(username);
@@ -63,9 +67,9 @@ function handleSubmit(ev: any) {
         }
         else {
             ev.target.reset();
-            formInput?.removeEventListener = "true"
-            formButton?.ariaDisabled = "true";
-            formInput?.ariaDisabled = "true";
+            // formInput.removeEventListener = "true"
+            formButton.ariaDisabled = "true";
+            formInput.ariaDisabled = "true";
             alert('You have reached the maximum number of players');
         }
         localStorage.setItem('playerList', JSON.stringify(playerList));
@@ -131,7 +135,7 @@ function renderPlayers(usersWrapper: HTMLDivElement | null) {
               </button>
               </div>`;
         }).join();
-        if (playerNum > 1) {
+        if (playerList.length > 1) {
             renderGoBtn(document.querySelector("#submitWrapper"))
         }
     } catch (error) {
@@ -190,6 +194,7 @@ function handleSubmitGo(ev: any) {
 
 function buttonState(set: string) {
     try {
+        const formButton = document.querySelector("#send");
         if (!formButton) throw new Error("no button");
         formButton.ariaDisabled = set;
     } catch (error) {
