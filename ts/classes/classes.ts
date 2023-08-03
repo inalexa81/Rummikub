@@ -1,3 +1,4 @@
+
 class Card {
     constructor(public value: number, public color: string, public imgUrl: string, public isJoker: boolean) {
     }
@@ -75,7 +76,6 @@ class Game {
             // // Now the playersPick array is sorted based on card value
             // console.log(playersPick);
             // console.log(this.gameDeck);
-
         } catch (error) {
             console.error(error)
         }
@@ -83,7 +83,7 @@ class Game {
 
     drawnCard(): Card | undefined {
         try {
-            if (this.gameDeck === undefined) throw new Error("No more Cards to deal")
+            if (this.gameDeck === undefined)throw new Error("No more Cards to deal")
             const randomIndx = Math.floor(Math.random() * this.gameDeck.length);
             const Card: Card = this.gameDeck[randomIndx];
             this.gameDeck.splice(randomIndx, 1);
@@ -100,6 +100,7 @@ class Game {
             console.error(error)
         }
     }
+
 }
 
 function comparePlayer(a: { player: Player, card: Card | undefined }, b: { player: Player, card: Card | undefined }) {

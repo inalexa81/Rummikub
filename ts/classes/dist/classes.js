@@ -108,6 +108,7 @@ var Game = /** @class */ (function () {
     };
     return Game;
 }());
+
 function comparePlayer(a, b) {
     if (!a.card && !b.card) {
         return 0; // Both cards are undefined, consider them equal
