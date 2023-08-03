@@ -1,10 +1,42 @@
-var playerList = [];
-var playerNum = playerList.length;
+var Player = /** @class */ (function () {
+    function Player(name, firstDrop) {
+        this.name = name;
+        this.cards = [];
+        this.firstDrop = (firstDrop !== undefined) ? firstDrop : false;
+    }
+    return Player;
+}());
+var Card = /** @class */ (function () {
+    function Card(value, color, imgUrl, isJoker) {
+        this.value = value;
+        this.color = color;
+        this.imgUrl = imgUrl;
+        this.isJoker = isJoker;
+    }
+    return Card;
+}());
+var playerList = getplayersListFromStorage();
+function getplayersListFromStorage() {
+    try {
+        var storageString = localStorage.getItem("playersList");
+        if (!storageString)
+            throw new Error("No such name in local storage");
+        //convert string to array of objects
+        var storageArray = JSON.parse(storageString);
+        //convert array of objects to array of Card | Player
+        var players = storageArray.map(function (p) {
+            return new Player(p.name);
+        });
+        return players;
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
 function handleInput(event) {
     do {
-        buttonState(playerList);
-        console.dir(event);
-        console.log(event.target.value);
+        debugger;
+        buttonState(playerList.length);
         var root = document.querySelector('#root');
     } while (playerNum > 5);
 }
@@ -12,24 +44,17 @@ var formInput = document.querySelector("#name");
 var formButton = document.querySelector("#send");
 function handleSubmit(ev) {
     ev.preventDefault();
+    debugger;
     try {
         if (playerList.length < 4) {
-            console.dir(ev);
             var username = ev.target.player.value;
-            console.log(username);
-            playerList.push(username);
-            console.log(playerList);
+            var player = new Player(username);
+            playerList.push(player);
             ev.target.reset();
-            renderPlayers(playerList);
-            console.log(playerList);
+            renderPlayer(player);
         }
         else {
-            ev.preventDefault();
-            console.dir(ev);
-            console.log(username);
-            console.log(playerList);
             ev.target.reset();
-            console.log(playerList);
             formInput === null || formInput === void 0 ? void 0 : formInput.removeEventListener = "true";
             formButton === null || formButton === void 0 ? void 0 : formButton.ariaDisabled = "true";
             formInput === null || formInput === void 0 ? void 0 : formInput.ariaDisabled = "true";
@@ -41,27 +66,76 @@ function handleSubmit(ev) {
         console.error(error);
     }
 }
-function renderPlayers(playersList) {
+// function renderPlayer(player: Player) {
+//     const usersWrapper = document.querySelector(`#usersWrapper`);
+//     const playerNum = playerList.length;
+//     // const playerDetails = playerList[playerList.length - 1];
+//     if (!player) throw new Error(`Player not found`);
+//     if (usersWrapper) {
+//         usersWrapper.innerHTML += `<div class="row" id="" >
+//         <div class="playerRow" id="" style="background-color: black">
+//         <div class="details" ><h3> שחקן מספר    ${playerNum} :    ${player.name}</h3></div>
+//       </div>
+//       <button type="button" id="" onclick="handleDeletePlayer(event)" >
+//       delete
+//       </button>
+//       </div>`;
+//     }
+//     if (playerNum > 1) {
+//         submitWrapper.innerHTML = '';
+//         submitWrapper.innerHTML += `
+//         <form onsubmit="handleSubmitGo(event)">
+//         <input type="submit" id="go" value="!קדימה" />
+//         </form> `;
+//     }
+// }
+function renderPlayer(player) {
     var usersWrapper = document.querySelector("#usersWrapper");
-    var playerNum = playerList.length;
-    console.log(playerList);
-    console.log(playerNum);
-    var playerDetails = playerList[playerList.length - 1];
-    if (!playerDetails)
-        throw new Error("Player's details not found");
-    if (usersWrapper) {
-        usersWrapper.innerHTML += "<div class=\"row\" id=\"\" >\n        <div class=\"playerRow\" id=\"\" style=\"background-color: black\">\n        <div class=\"details\" ><h3> \u05E9\u05D7\u05E7\u05DF \u05DE\u05E1\u05E4\u05E8    " + playerNum + " :    " + playerDetails + "</h3></div>\n      </div> \n      <button type=\"button\" id=\"\" onclick=\"handleDeletePlayer(event)\" >\n      delete\n      </button>\n      </div>";
+    if (!player)
+        throw new Error("Player not found");
+    if (!usersWrapper)
+        throw new Error("#usersWrapper not found");
+    usersWrapper.innerHTML += "<div class=\"row\" id=\"\" >\n        <div class=\"playerRow\" id=\"\" style=\"background-color: black\">\n        <div class=\"details\" ><h3> \u05E9\u05D7\u05E7\u05DF \u05DE\u05E1\u05E4\u05E8    " + playerList.length + " :    " + player.name + "</h3></div>\n      </div> \n      <button type=\"button\" id=\"p" + playerList.length + "\" onclick=\"handleDeletePlayer(event)\" >\n      delete\n      </button>\n      </div>";
+    if (playerList.length == 2) {
+        renderGoBtn(document.querySelector("#submitWrapper"));
     }
-    if (playerNum > 1) {
-        submitWrapper.innerHTML = '';
-        submitWrapper.innerHTML += "\n        <form onsubmit=\"handleSubmitGo(event)\">\n        <input type=\"submit\" id=\"go\" value=\"!\u05E7\u05D3\u05D9\u05DE\u05D4\" />\n        </form> ";
+    if (playerList.length == 4) {
+        buttonState("true");
     }
 }
-function handleDeletePlayer(playerNum) {
+function renderPlayers(usersWrapper) {
     try {
+        if (!usersWrapper)
+            throw new Error("Player not found");
+        usersWrapper.innerHTML = playerList.map(function (p, index) {
+            return "<div class=\"row\" id=\"\" >\n                <div class=\"playerRow\" id=\"\" style=\"background-color: black\">\n                <div class=\"details\" ><h3> \u05E9\u05D7\u05E7\u05DF \u05DE\u05E1\u05E4\u05E8    " + index + " :    " + p.name + "</h3></div>\n              </div> \n              <button type=\"button\" id=\"\" onclick=\"handleDeletePlayer(event)\" >\n              delete\n              </button>\n              </div>";
+        }).join();
+        if (playerNum > 1) {
+            renderGoBtn(document.querySelector("#submitWrapper"));
+        }
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+function renderGoBtn(btn) {
+    try {
+        if (!btn)
+            throw new Error("Player not found");
+        btn.innerHTML = "\n            <form onsubmit=\"handleSubmitGo(event)\">\n            <input type=\"submit\" id=\"go\" value=\"!\u05E7\u05D3\u05D9\u05DE\u05D4\" />\n            </form> ";
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+function handleDeletePlayer(ev) {
+    try {
+        debugger;
+        var playerId = ev.target.id;
+        var playerNum = parseInt(playerId.substring(1)) - 1;
         playerList.splice(playerNum, 1);
-        console.log(playerList);
-        renderPlayers;
+        renderPlayers(document.querySelector("#usersWrapper"));
+        buttonState("false");
     }
     catch (error) {
         console.error(error);
@@ -71,18 +145,26 @@ function handleSubmitGo(ev) {
     ev.preventDefault();
     try {
         console.dir(ev);
-        var otherPageURL = 'set-seria.html';
-        window.location.href = otherPageURL;
+        window.location.href = "../set-seria/set-seria.html";
     }
     catch (error) {
         console.error(error);
     }
 }
-function buttonState(playerList) {
-    if (playerList.length === 4) {
-        formButton.ariaDisabled = "true";
+// function buttonState(length: number) {
+//     if (playerList.length === 4) {
+//         formButton.ariaDisabled = "true";
+//     } else {
+//         formButton.ariaDisabled = "false";
+//     }
+// }
+function buttonState(set) {
+    try {
+        if (!formButton)
+            throw new Error("no button");
+        formButton.ariaDisabled = set;
     }
-    else {
-        formButton.ariaDisabled = "false";
+    catch (error) {
+        console.error(error);
     }
 }

@@ -1,51 +1,68 @@
+class Player {
+    cards: Card[] = [];
+    firstDrop: boolean;
+    constructor(public name: string, firstDrop?: boolean | undefined) {
+        this.firstDrop = (firstDrop !== undefined) ? firstDrop : false;
 
-const playerList:[] = [];
-const playerNum  = playerList.length;
+    }
+}
 
+class Card {
+    constructor(public value: number, public color: string, public imgUrl: string, public isJoker: boolean) {
+    }
+}
 
-function handleInput(event) {
-  do{
-      buttonState(playerList)
-      console.dir(event)
-      console.log(event.target.value);
-      const root = document.querySelector('#root');
-  }  
-  while(playerNum > 5);
+const playerList: Player[] = getplayersListFromStorage();
+
+function getplayersListFromStorage(): Player[]{
+    try {
+
+        const storageString = localStorage.getItem(`playersList`);
+        if (!storageString) throw new Error("No such name in local storage");
+        //convert string to array of objects
+        const storageArray = JSON.parse(storageString);
+        //convert array of objects to array of Card | Player
+        const players: Player[] = storageArray.map((p: Player) => {
+            return new Player(
+                p.name
+            )
+        });
+        return players;
+
+    } catch (error) {
+        console.error(error)
+    }
 
 }
- 
+
+function handleInput(event) {
+    do {
+        debugger;
+        buttonState(playerList.length)
+        const root = document.querySelector('#root');
+    }
+    while (playerNum > 5);
+
+}
+
 
 const formInput = document.querySelector("#name");
 
 const formButton = document.querySelector("#send");
 
-function handleSubmit(ev:any){
+function handleSubmit(ev: any) {
     ev.preventDefault();
+    debugger;
     try {
         if (playerList.length < 4) {
-        console.dir(ev);
-
-       let username:string = ev.target.player.value;
-        console.log(username)
-        playerList.push(username);
-        console.log(playerList);
-        ev.target.reset();
-
-
-        renderPlayers(playerList);
-        console.log(playerList);
+            let username: string = ev.target.player.value;
+            const player = new Player(username);
+            playerList.push(player);
+            ev.target.reset();
+            renderPlayer(player);
         }
         else {
-            ev.preventDefault();
-            console.dir(ev);
-    
-           
-            console.log(username)
-            console.log(playerList);
             ev.target.reset();
-    
-            console.log(playerList);
-
             formInput?.removeEventListener = "true"
             formButton?.ariaDisabled = "true";
             formInput?.ariaDisabled = "true";
@@ -56,64 +73,126 @@ function handleSubmit(ev:any){
         console.error(error);
     }
 }
-function renderPlayers(playersList) {
+// function renderPlayer(player: Player) {
+//     const usersWrapper = document.querySelector(`#usersWrapper`);
+//     const playerNum = playerList.length;
+//     // const playerDetails = playerList[playerList.length - 1];
+//     if (!player) throw new Error(`Player not found`);
+//     if (usersWrapper) {
+//         usersWrapper.innerHTML += `<div class="row" id="" >
+//         <div class="playerRow" id="" style="background-color: black">
+//         <div class="details" ><h3> שחקן מספר    ${playerNum} :    ${player.name}</h3></div>
+//       </div>
+//       <button type="button" id="" onclick="handleDeletePlayer(event)" >
+//       delete
+//       </button>
+//       </div>`;
+//     }
+
+//     if (playerNum > 1) {
+//         submitWrapper.innerHTML = '';
+//         submitWrapper.innerHTML += `
+//         <form onsubmit="handleSubmitGo(event)">
+//         <input type="submit" id="go" value="!קדימה" />
+//         </form> `;
+//     }
+// }
+
+function renderPlayer(player: Player) {
     const usersWrapper = document.querySelector(`#usersWrapper`);
-     
-     const playerNum = playerList.length;
-     
-     console.log(playerList)
-     console.log(playerNum);
-     const playerDetails = playerList[playerList.length - 1];
-     if (!playerDetails) throw new Error(`Player's details not found`);
-    if (usersWrapper) {
-        usersWrapper.innerHTML += `<div class="row" id="" >
+    if (!player) throw new Error(`Player not found`);
+    if (!usersWrapper) throw new Error(`#usersWrapper not found`);
+    usersWrapper.innerHTML += `<div class="row" id="" >
         <div class="playerRow" id="" style="background-color: black">
-        <div class="details" ><h3> שחקן מספר    ${playerNum} :    ${playerDetails}</h3></div>
+        <div class="details" ><h3> שחקן מספר    ${playerList.length} :    ${player.name}</h3></div>
       </div> 
-      <button type="button" id="" onclick="handleDeletePlayer(event)" >
+      <button type="button" id="p${playerList.length}" onclick="handleDeletePlayer(event)" >
       delete
       </button>
       </div>`;
-      
+    if (playerList.length == 2) {
+        renderGoBtn(document.querySelector("#submitWrapper"))
     }
-    
-    if (playerNum > 1){
-        submitWrapper.innerHTML ='';
-        submitWrapper.innerHTML += `
-        <form onsubmit="handleSubmitGo(event)">
-        <input type="submit" id="go" value="!קדימה" />
-        </form> `;
+    if (playerList.length == 4) {
+        buttonState("true");
     }
-  }
+}
 
-  function handleDeletePlayer(playerNum) {
+function renderPlayers(usersWrapper: HTMLDivElement | null) {
     try {
-        playerList.splice(playerNum,1);
-       console.log(playerList)
-       renderPlayers
+        if (!usersWrapper) throw new Error(`Player not found`);
+        usersWrapper.innerHTML = playerList.map((p, index) => {
+            return `<div class="row" id="" >
+                <div class="playerRow" id="" style="background-color: black">
+                <div class="details" ><h3> שחקן מספר    ${index} :    ${p.name}</h3></div>
+              </div> 
+              <button type="button" id="" onclick="handleDeletePlayer(event)" >
+              delete
+              </button>
+              </div>`;
+        }).join();
+        if (playerNum > 1) {
+            renderGoBtn(document.querySelector("#submitWrapper"))
+        }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
+function renderGoBtn(btn: HTMLDivElement | null) {
+    try {
+        if (!btn) throw new Error(`Player not found`);
+        btn.innerHTML = `
+            <form onsubmit="handleSubmitGo(event)">
+            <input type="submit" id="go" value="!קדימה" />
+            </form> `;
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
+
+function handleDeletePlayer(ev) {
+    try {
+        debugger;
+        const playerId: string = ev.target.id
+        const playerNum = parseInt(playerId.substring(1)) - 1;
+        playerList.splice(playerNum, 1);
+        renderPlayers(document.querySelector(`#usersWrapper`));
+        buttonState("false");
     } catch (error) {
         console.error(error);
     }
 
-  }
+}
 
-   function handleSubmitGo(ev:any){
+function handleSubmitGo(ev: any) {
     ev.preventDefault();
     try {
         console.dir(ev);
-        const otherPageURL = 'set-seria.html';
-        window.location.href = otherPageURL;
+        window.location.href = `../set-seria/set-seria.html`;
     } catch (error) {
         console.error(error);
     }
 }
 
 
-   
-   function buttonState(playerList){
-    if (playerList.length === 4){
-        formButton.ariaDisabled = "true";
-   } else {
-    formButton.ariaDisabled = "false";
-   }
-   }
+
+// function buttonState(length: number) {
+//     if (playerList.length === 4) {
+//         formButton.ariaDisabled = "true";
+//     } else {
+//         formButton.ariaDisabled = "false";
+//     }
+// }
+
+function buttonState(set: string) {
+    try {
+        if (!formButton) throw new Error("no button");
+        formButton.ariaDisabled = set;
+    } catch (error) {
+        console.error(error)
+    }
+}
