@@ -1,0 +1,96 @@
+body {
+    position: relative;
+    height: 96vh;
+    width: 96vw;
+    margin: auto;
+    overflow: hidden;
+    justify-content: center;
+    background-color: black;
+
+}
+
+#board {
+    width: 70vw;
+    height: 70%;
+    display: grid;
+    grid-template-rows: repeat(4, 93px);
+    grid-template-columns: repeat(10, 65px);
+    gap: 3px;
+    margin-bottom: 20px;
+    margin-left: 13vw;
+    background-color: aqua;
+    justify-content: center;
+
+    .square {
+        transition: all 0.2s;
+    }
+}
+
+#player {
+    margin-top: 10px;
+    width: 70Vw;
+    height: 30%;
+    position: relative;
+    // margin: auto;
+    bottom: 10px;
+    left: 13Vw;
+    background-color: burlywood;
+    z-index: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    justify-content: space-around;
+    align-items: center;
+    justify-items: center;
+    flex-direction: column;
+
+    justify-content: center;
+    #cards{
+        width: 100%;
+        height: fit-content;
+        display: flex;
+        justify-content: space-evenly;
+        position: relative;
+        left:30px;
+        flex-wrap: wrap;
+        .card {
+            margin-top: 5px;
+            background-size: cover;
+            width: 65px;
+            height: 93px;
+            position: relative;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s;
+        }
+    }
+
+
+    p{
+        position: absolute;
+        top: 75%;
+        font-size: 1.2rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+    }
+
+    #playerAction{
+        width: 200px;
+        height: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        position: absolute;
+        left: -200px;
+
+        button{
+            height: 50px;
+            width: 100px;
+            border-radius: 10px;
+        }
+
+        button:hover{
+            cursor:pointer;
+            background-color: aqua;
+        }
+
+    }
+
+}
