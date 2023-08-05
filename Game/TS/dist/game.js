@@ -17,11 +17,12 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 var Card = /** @class */ (function () {
-    function Card(value, color, imgUrl, isJoker) {
+    function Card(value, color, imgUrl, isJoker, id) {
         this.value = value;
         this.color = color;
         this.imgUrl = imgUrl;
         this.isJoker = isJoker;
+        this.id = (id === undefined) ? "id-" + new Date().getTime() + "-" + Math.random() : this.id;
     }
     return Card;
 }());
@@ -74,8 +75,29 @@ function getplayersListFromStorage() {
         return [];
     }
 }
+var Bord = /** @class */ (function () {
+    function Bord() {
+        this.series = [];
+        debugger;
+    }
+    return Bord;
+}());
+function addToBord(board, nid, card) {
+    try {
+        var cards = [];
+        while (card.length > 0) {
+            var c = card.pop();
+            if (c !== undefined)
+                cards.push(c);
+        }
+        board.series.push({ id: nid, cards: cards });
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
 var Game = /** @class */ (function () {
-    function Game(player1, player2, player3, player4, startIndx, currIndx) {
+    function Game(player1, player2, player3, player4, startIndx, currIndx, gameOver, countRounds, board) {
         this.players = [];
         this.gameDeck = getNewDeck();
         this.players.push({ player: player1, score: 0 });
@@ -86,12 +108,15 @@ var Game = /** @class */ (function () {
             this.players.push({ player: player4, score: 0 });
         this.startIndx = (startIndx !== undefined) ? startIndx : this.startIndx;
         this.currIndx = (currIndx !== undefined) ? currIndx : this.currIndx;
+        this.gameOver = (gameOver !== undefined) ? gameOver : false;
+        this.countRounds = (countRounds !== undefined) ? countRounds : 0;
+        this.board = (board !== undefined) ? board : new Bord();
     }
     Game.prototype.setPlayersForDraw = function (playersPick) {
         var _this = this;
         try {
             this.players.forEach(function (p) {
-                playersPick.push({ player: __assign({}, p.player), card: _this.drawnCard() });
+                playersPick.push({ player: p.player, card: _this.drawnCard() });
             });
         }
         catch (error) {
@@ -119,13 +144,10 @@ var Game = /** @class */ (function () {
             // Sort the playersPick array based on card value (ascending order)
             playersPick_1.sort(comparePlayer);
             this.startIndx = this.players.findIndex(function (p) { return p.player.name === playersPick_1[0].player.name; });
-            alert(playersPick_1[0].player.name.toUpperCase() + " you got the higest, you go first");
+            alert(playersPick_1[0].player.name.toUpperCase() + " you got the higest card, you go first");
             this.currIndx = this.startIndx;
             console.log(playersPick_1);
             this.returnCardToDeck(playersPick_1);
-            // // Now the playersPick array is sorted based on card value
-            // console.log(playersPick);
-            // console.log(this.gameDeck);
         }
         catch (error) {
             console.error(error);
@@ -154,6 +176,22 @@ var Game = /** @class */ (function () {
     };
     return Game;
 }());
+function loadFromLocalStorage() {
+    var _a, _b;
+    try {
+        debugger;
+        var gameJSON = localStorage.getItem('Game');
+        if (gameJSON) {
+            var gameObj = JSON.parse(gameJSON);
+            var game = new Game(gameObj.players[0].player, gameObj.players[1].player, (_a = gameObj.players[2]) === null || _a === void 0 ? void 0 : _a.player, (_b = gameObj.players[3]) === null || _b === void 0 ? void 0 : _b.player, gameObj.startIndx, gameObj.currIndx, gameObj.gameOver, gameObj.countRouds, gameObj.board);
+            game.gameDeck = gameObj.gameDeck;
+            return game;
+        }
+    }
+    catch (error) {
+        console.error('Error loading game from Local Storage:', error);
+    }
+}
 function comparePlayer(a, b) {
     if (!a.card && !b.card) {
         return 0; // Both cards are undefined, consider them equal
@@ -166,15 +204,18 @@ function comparePlayer(a, b) {
     }
     return b.card.value - a.card.value; // Sorting by card value
 }
-function computeScore(players) {
+function computeScore(players, winner) {
     try {
         if (!players)
             throw new Error("Game element missing");
+        var total_1 = 0;
         players.forEach(function (player) {
             var initialValue = 0;
             var sumWithInitial = player.player.cards.reduce(function (accumulator, currentValue) { return accumulator + currentValue.value; }, initialValue);
             player.score -= initialValue; // winner new to add (+) score
+            total_1 += initialValue;
         });
+        players[winner].score += total_1;
     }
     catch (error) {
         console.error(error);
@@ -211,10 +252,6 @@ function checkSerial(cards) {
     try {
         if (!cards)
             throw new Error("No cards");
-        if (cards.length < 3) {
-            alert("Minimum three cards");
-            return false;
-        }
         var isSequential = cards.slice(0, -1).every(function (card, index) { return (card.value + 1) === cards[index + 1].value; });
         var sameColor = checkColors(cards);
         return isSequential && sameColor;
@@ -308,12 +345,19 @@ function addToExist(serie, cardToAdd) {
             throw new Error("No serie cards");
         if (cardToAdd === undefined)
             throw new Error("No card to add");
-        if (checkAddToSerie(serie, cardToAdd))
+        serie.sort(compareCards);
+        if (checkAddToSerie(serie, cardToAdd)) {
             serie.push(cardToAdd);
+            return cardToAdd;
+        }
         else {
             if (checkAddToSerial(serie, cardToAdd)) {
                 serie.push(cardToAdd);
-                serie.sort(compareCards);
+                alert("added");
+                return cardToAdd;
+            }
+            else {
+                alert("Can not be added");
             }
         }
     }
@@ -328,6 +372,7 @@ function setBigginerIndx(currGame) {
             currGame.startIndx = 0;
         else
             currGame.startIndx++;
+        currGame.countRounds++;
         localStorage.setItem("Game", JSON.stringify(currGame));
     }
     catch (error) {
@@ -511,12 +556,12 @@ function shuffleCards(cards) {
         return [];
     }
 }
-var currentGame;
-function startGame(players) {
+function startNewGame(players) {
     try {
         currentGame = new Game(playerList[0], playerList[1], playerList[2], playerList[3]);
         currentGame.pickBigginer();
-        var countRouds = 4;
+        currentGame.countRounds = 0;
+        localStorage.setItem("Game", JSON.stringify(currentGame));
         playRound(currentGame);
     }
     catch (error) {
@@ -525,6 +570,8 @@ function startGame(players) {
 }
 function playRound(game) {
     try {
+        if (game === undefined)
+            throw new Error("No game");
         var bigginer = game.startIndx;
         var empty = false; //player with empty hands
         currentPlayer = game.players[bigginer].player;
@@ -544,7 +591,7 @@ function cardsEventListener(player, cards) {
         cards.forEach(function (element) {
             element.style.borderRadius = '7px';
             var addCard = element.addEventListener("click", function () {
-                indexOfCurrentCard = player.cards.findIndex(function (card) { return "" + card.value + card.color === element.id; });
+                indexOfCurrentCard = player.cards.findIndex(function (card) { return card.id === element.id; });
                 currentCard = player.cards[indexOfCurrentCard];
                 if (currentCard !== undefined) {
                     if (element.style.bottom === '30px') {
@@ -589,7 +636,7 @@ function renderPlayerManu(player, div) {
     try {
         if (!div)
             throw new Error("No #player");
-        div.innerHTML = "<button name=\"close\" onclick=\"hundleOnClick(event)\">close Seria</button>\n        <button name=\"done\" onclick=\"hundleOnClick(event)\">Done</button>\n        <button name=\"card\" onclick=\"hundleOnClick(event)\">Get Card</button>\n        <button name=\"sortColor\" onclick=\"hundleOnClick(event)\">Sort By Color</button>\n        <button name=\"sortValue\" onclick=\"hundleOnClick(event)\">Sort By Value</button>";
+        div.innerHTML = "<button name=\"close\" onclick=\"hundleOnClick(event)\">close Seria</button>\n        <button name=\"done\" onclick=\"hundleOnClick(event)\">Done</button>\n        <button name=\"card\" onclick=\"hundleOnClick(event)\">Get Card</button>\n        <button name=\"sortColor\" onclick=\"hundleOnClick(event)\">Sort By Color</button>\n        <button name=\"sortValue\" onclick=\"hundleOnClick(event)\">Sort By Value</button>\n        <button name=\"addToSeria\" onclick=\"hundleOnClick(event)\">Add to Seria</button>";
         cardsEventListener(player, document.querySelectorAll(".card"));
     }
     catch (error) {
@@ -605,7 +652,7 @@ function renderPlayerBord(player, div) {
             throw new Error("No #cards");
         bord_1.innerHTML = "";
         player.cards.forEach(function (card) {
-            bord_1.innerHTML += "<div class=\"card\" id = \"" + card.value + card.color + "\" style=\"background-image: url('" + card.imgUrl + "');\"></div>";
+            bord_1.innerHTML += "<div class=\"card\" id = \"" + card.id + "\" style=\"background-image: url('" + card.imgUrl + "');\"></div>";
         });
         bord_1.innerHTML += "<p>Current Player Turn: " + player.name + "</p>";
         renderPlayerManu(player, document.querySelector("#playerAction"));
@@ -616,6 +663,8 @@ function renderPlayerBord(player, div) {
 }
 function setNextPlayer() {
     try {
+        if (currentGame === undefined)
+            throw new Error("Game is undefined");
         if (currentGame.gameDeck.length === 0) {
             // endOfGame();
         }
@@ -628,18 +677,61 @@ function setNextPlayer() {
         console.error(error);
     }
 }
+function findWinner(players) {
+    try {
+        var minIndx_1 = -1;
+        var minVal_1 = 1000;
+        players.forEach(function (player, indx) {
+            var initialValue = 0;
+            var sumWithInitial = player.player.cards.reduce(function (accumulator, currentValue) { return accumulator + currentValue.value; }, initialValue);
+            if (initialValue < minVal_1) {
+                minVal_1 = initialValue;
+                minIndx_1 = indx;
+            }
+        });
+        return minIndx_1;
+    }
+    catch (error) {
+        console.error(error);
+        return -1;
+    }
+}
+function endOfGame(win, indx) {
+    try {
+        if (currentGame === undefined)
+            throw new Error("Game is undefined");
+        if (win === "emptyDeck") {
+            indx = findWinner(currentGame.players);
+        }
+        computeScore(currentGame.players, indx);
+        setBigginerIndx(currentGame);
+        if (currentGame.countRounds === 4) {
+            alert("Four rounds completed game over");
+            currentGame.gameOver = true;
+        }
+        localStorage.setItem("playerList", JSON.stringify(currentGame.players));
+        location.href = "../HTML/scoreBoard.html";
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
 function takeCard() {
     try {
-        debugger;
+        if (currentGame === undefined)
+            throw new Error("Game is undefined");
+        if (currentGame.gameDeck.length === 0) {
+            endOfGame("emptyDeck", currentGame.currIndx);
+        }
         var card = currentGame.gameDeck.pop();
         if (card === undefined)
             throw new Error("no card");
         currentPlayer.cards.push(card);
-        localStorage.setItem("Game", JSON.stringify(currentGame));
+        localStorage.setItem("playerList", JSON.stringify(currentGame.players));
         renderPlayerBord(currentPlayer, document.querySelector("#player"));
         setTimeout(function () {
             setNextPlayer();
-        }, 2000);
+        }, 1000);
     }
     catch (error) {
         console.error(error);
@@ -659,7 +751,8 @@ function removeFromBord(cards) {
 }
 function clearSerie(cards) {
     try {
-        cards.length = 0;
+        while (cards.length)
+            cards.pop();
     }
     catch (error) {
         console.error(error);
@@ -667,28 +760,44 @@ function clearSerie(cards) {
 }
 function closeSeria() {
     try {
-        debugger;
-        if (checkSerial(currentSeria) || checkSerie(currentSeria)) {
-            newSerias.push(__assign({}, currentSeria));
-            removeFromBord(currentSeria);
-            clearSerie(currentSeria);
+        var temp = [];
+        if (currentSeria.length < 3)
+            alert("Minimum three cards");
+        else {
+            currentSeria.sort(compareCards);
+            if (checkSerial(currentSeria) || checkSerie(currentSeria)) {
+                removeFromBord(currentSeria);
+                while (currentSeria.length) {
+                    var card = currentSeria.pop();
+                    if (card !== undefined)
+                        temp.push(card);
+                }
+                newSerias.push(temp.sort(compareCards));
+                clearSerie(currentSeria);
+            }
         }
     }
     catch (error) {
         console.error(error);
     }
 }
-function renderToMainBord(cards, board) {
+function renderToMainBord(cards, boardDiv) {
     try {
         debugger;
-        if (!board)
+        console.dir(currentGame === null || currentGame === void 0 ? void 0 : currentGame.board);
+        if (!boardDiv)
             throw new Error("no #board");
         cards.forEach(function (seria) {
-            var html = "<div>\n             ";
+            if (currentGame === undefined)
+                throw Error("No game");
+            var newId = new Date().getTime() - Math.random();
+            var html = "<div class=\"seria\" id=\"id-" + newId + "\">\n             ";
             seria.forEach(function (card) {
                 html += "<div class=\"card\" style=\"background-image: url('" + card.imgUrl + "');\"></div>";
             });
             html += "</div>";
+            boardDiv.innerHTML += html;
+            addToBord(currentGame.board, "id-" + newId, seria);
         });
     }
     catch (error) {
@@ -697,8 +806,15 @@ function renderToMainBord(cards, board) {
 }
 function returnCardsToBord(cardsToReturn, player) {
     try {
-        var cards = cardsToReturn.flat();
-        debugger;
+        var cards = cardsToReturn.flat(2);
+        cardsToReturn.forEach(function (card) {
+            while (card.length) {
+                var tmpCard = card.pop();
+                if (tmpCard !== undefined)
+                    player.cards.push(tmpCard);
+            }
+        });
+        renderPlayerBord(player, document.querySelector("#player"));
     }
     catch (error) {
         console.error(error);
@@ -706,14 +822,25 @@ function returnCardsToBord(cardsToReturn, player) {
 }
 function checkDone() {
     try {
-        debugger;
-        if (!currentPlayer.firstDrop) {
-            if (checkSumAtLeast30(newSerias) >= 30) {
-                currentPlayer.firstDrop = true;
-                renderToMainBord(newSerias, document.querySelector("#board"));
+        if (newSerias.length > 0) {
+            if (!currentPlayer.firstDrop) {
+                if (checkSumAtLeast30(newSerias) >= 30) {
+                    currentPlayer.firstDrop = true;
+                    renderToMainBord(newSerias, document.querySelector("#board"));
+                    setNextPlayer();
+                }
+                else {
+                    returnCardsToBord(newSerias, currentPlayer);
+                }
             }
             else {
-                returnCardsToBord(newSerias, currentPlayer);
+                renderToMainBord(newSerias, document.querySelector("#board"));
+                if (currentPlayer.cards.length == 0) {
+                    var pIndex = playerList.findIndex(function (p) { return p.name === currentPlayer.name; });
+                    endOfGame("emptyBord", pIndex);
+                }
+                else
+                    setNextPlayer();
             }
         }
     }
@@ -724,13 +851,102 @@ function checkDone() {
 function checkSumAtLeast30(serias) {
     try {
         var sumOfCard_1 = 0;
-        var checking = serias.flat();
-        checking.forEach(function (card) { return sumOfCard_1 += card.value; });
+        serias.forEach(function (serie) {
+            serie.forEach(function (card) {
+                sumOfCard_1 += card.value;
+            });
+        });
         return sumOfCard_1;
     }
     catch (error) {
         console.error(error);
         return 0;
+    }
+}
+function chooseCardToAdd(serie) {
+    try {
+        debugger;
+        if (currentSeria.length !== 1)
+            alert("Pleas choose only one card from your board before adding it to exist");
+        else {
+            return addToExist(serie, currentSeria[0]);
+        }
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+function convertToCards(cards) {
+    try {
+        if (currentGame === undefined)
+            throw new Error("no gamee");
+        var cardsIndx = currentGame === null || currentGame === void 0 ? void 0 : currentGame.board.series.findIndex(function (serie) { return serie.id === cards.id; });
+        var cArr = currentGame.board.series[cardsIndx].cards.map(function (card) { return (__assign({}, card)); });
+        return cArr;
+    }
+    catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+function removeCardfromPlayer(card) {
+    try {
+        debugger;
+        var indx = currentPlayer.cards.findIndex(function (c) { return c.id === card.id; });
+        if (indx !== -1) {
+            currentPlayer.cards.splice(indx, 1);
+            currentSeria.pop();
+            renderPlayerBord(currentPlayer, document.querySelector("#player"));
+        }
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+function renderAddCardSerie(serie, card) {
+    try {
+        var indx = currentGame === null || currentGame === void 0 ? void 0 : currentGame.board.series.findIndex(function (s) { return s.id === serie.id; });
+        var c = removeCardfromPlayer(card);
+        if (indx !== -1 && indx !== undefined) {
+            currentGame === null || currentGame === void 0 ? void 0 : currentGame.board.series[indx].cards.push(card);
+            var div_1 = document.getElementById("" + serie.id);
+            if (!div_1)
+                throw new Error("No serie div");
+            div_1.innerHTML = "";
+            currentGame === null || currentGame === void 0 ? void 0 : currentGame.board.series[indx].cards.sort(compareCards);
+            currentGame === null || currentGame === void 0 ? void 0 : currentGame.board.series[indx].cards.forEach(function (card) {
+                div_1.innerHTML += "<div class=\"card\" style=\"background-image: url('" + card.imgUrl + "');\"></div>";
+            });
+        }
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+function setExistListenner(series) {
+    try {
+        series.forEach(function (serie) {
+            serie.addEventListener("mouseenter", function () {
+                debugger;
+                var turTocard = convertToCards(serie);
+                var card = chooseCardToAdd(turTocard);
+                if (card !== undefined) {
+                    renderAddCardSerie(serie, card);
+                }
+            }); // Pass an anonymous function to addEventListener
+        });
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+function startAddToExist() {
+    try {
+        var mainBoard = document.querySelectorAll(".seria");
+        setExistListenner(mainBoard);
+    }
+    catch (error) {
+        console.error;
     }
 }
 function hundleOnClick(ev) {
@@ -750,6 +966,9 @@ function hundleOnClick(ev) {
                 break;
             case "card":
                 takeCard();
+                break;
+            case "addToSeria":
+                startAddToExist();
                 break;
         }
     }
@@ -778,6 +997,14 @@ function sortByValue() {
 // GAME
 var currentPlayer;
 var playerList = getplayersListFromStorage();
-if (playerList.length > 1) {
-    startGame(playerList);
+var currentGame = loadFromLocalStorage();
+if (currentGame === undefined || currentGame.gameOver) {
+    if (playerList.length > 1) {
+        startNewGame(playerList);
+    }
+    else
+        location.href = "../HTML/index.html";
+}
+else {
+    playRound(currentGame);
 }
