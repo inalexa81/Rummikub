@@ -34,29 +34,6 @@ var Player = /** @class */ (function () {
     }
     return Player;
 }());
-var i = 0;
-var Square = /** @class */ (function () {
-    function Square(isOccupied, imgUrl, value, color) {
-        this.isOccupied = isOccupied;
-        this.imgUrl = imgUrl;
-        this.value = value;
-        this.color = color;
-        this.id = i;
-        i++;
-    }
-    Square.prototype.setOccupiedAndCardProperties = function (card) {
-        try {
-            this.isOccupied = true;
-            this.imgUrl = card.imgUrl;
-            this.color = card.color;
-            this.value = card.value;
-        }
-        catch (error) {
-            console.error(error);
-        }
-    };
-    return Square;
-}());
 function getplayersListFromStorage() {
     try {
         var storageString = localStorage.getItem("playerList");
@@ -179,7 +156,6 @@ var Game = /** @class */ (function () {
 function loadFromLocalStorage() {
     var _a, _b;
     try {
-        debugger;
         var gameJSON = localStorage.getItem('Game');
         if (gameJSON) {
             var gameObj = JSON.parse(gameJSON);
@@ -275,8 +251,20 @@ function checkColors(cards) {
 //only one show of each color
 function diffColors(cards) {
     try {
-        var colors = new Set(cards.map(function (card) { return card.color; }));
-        return (colors.size === 4 || colors.size === 3);
+        var colorsArr_1 = cards.map(function (item) { return item.color; });
+        var isDuplicate = colorsArr_1.some(function (item, idx) {
+            return colorsArr_1.indexOf(item) != idx;
+        });
+        var seriaOfColor = false;
+        if (cards[0].color !== cards[1].color) {
+            seriaOfColor = true;
+        }
+        if (isDuplicate && seriaOfColor) {
+            return false;
+        }
+        else {
+            return true;
+        }
     }
     catch (error) {
         console.error(error);
@@ -337,6 +325,25 @@ function compareCardsColor(a, b) {
     }
     else {
         return 0;
+    }
+}
+function splitSeria(existSeria, cardsToAdd) {
+    try {
+        var temporaryArr_1 = existSeria.concat(cardsToAdd);
+        temporaryArr_1.sort(compareCards);
+        var startOfNewSeria = temporaryArr_1.findIndex(function (card, index) { return card.value === temporaryArr_1[index + 1].value; }) + 1;
+        var indxOfExistSeria = newSerias.findIndex(function (seria) {
+            (seria[0] === existSeria[0]) && (seria[1] === existSeria[1]);
+        });
+        var newSeria1 = temporaryArr_1.slice(0, startOfNewSeria);
+        var newSeria2 = temporaryArr_1.slice(startOfNewSeria);
+        newSerias.splice(indxOfExistSeria, 1);
+        newSerias.push(newSeria1);
+        newSerias.push(newSeria2);
+        renderToMainBord(newSerias, document.querySelector("#board"));
+    }
+    catch (error) {
+        console.error(error);
     }
 }
 function addToExist(serie, cardToAdd) {
@@ -607,7 +614,6 @@ function cardsEventListener(player, cards) {
                         element.style.boxShadow = '0px 0px 5px 3px yellow';
                         currentSeria.push(currentCard);
                     }
-                    console.log(currentSeria);
                 }
             });
         });
@@ -751,8 +757,9 @@ function removeFromBord(cards) {
 }
 function clearSerie(cards) {
     try {
-        while (cards.length)
-            cards.pop();
+        // while (cards.length)
+        cards.forEach(function (card) { return cards.pop(); });
+        // cards.pop();
     }
     catch (error) {
         console.error(error);
@@ -773,7 +780,8 @@ function closeSeria() {
                         temp.push(card);
                 }
                 newSerias.push(temp.sort(compareCards));
-                clearSerie(currentSeria);
+                // clearSerie(currentSeria);
+                currentSeria = [];
             }
         }
     }
@@ -866,8 +874,10 @@ function checkSumAtLeast30(serias) {
 function chooseCardToAdd(serie) {
     try {
         debugger;
-        if (currentSeria.length !== 1)
-            alert("Pleas choose only one card from your board before adding it to exist");
+        if (currentSeria.length > 1) {
+            splitSeria(serie, currentSeria);
+        }
+        // alert("Pleas choose only one card from your board before adding it to exist")
         else {
             return addToExist(serie, currentSeria[0]);
         }
@@ -880,7 +890,7 @@ function convertToCards(cards) {
     try {
         if (currentGame === undefined)
             throw new Error("no gamee");
-        var cardsIndx = currentGame === null || currentGame === void 0 ? void 0 : currentGame.board.series.findIndex(function (serie) { return serie.id === cards.id; });
+        var cardsIndx = currentGame.board.series.findIndex(function (serie) { return serie.id === cards.id; });
         var cArr = currentGame.board.series[cardsIndx].cards.map(function (card) { return (__assign({}, card)); });
         return cArr;
     }
@@ -925,16 +935,19 @@ function renderAddCardSerie(serie, card) {
 }
 function setExistListenner(series) {
     try {
-        series.forEach(function (serie) {
-            serie.addEventListener("mouseenter", function () {
-                debugger;
-                var turTocard = convertToCards(serie);
-                var card = chooseCardToAdd(turTocard);
-                if (card !== undefined) {
-                    renderAddCardSerie(serie, card);
-                }
-            }); // Pass an anonymous function to addEventListener
-        });
+        if (currentPlayer.firstDrop) {
+            series.forEach(function (serie) {
+                serie.addEventListener("mouseenter", function () {
+                    debugger;
+                    var turTocard = convertToCards(serie);
+                    var card = chooseCardToAdd(turTocard);
+                    if (card !== undefined) {
+                        renderAddCardSerie(serie, card);
+                    }
+                }); // Pass an anonymous function to addEventListener
+            });
+        }
+        currentSeria = [];
     }
     catch (error) {
         console.error(error);
@@ -1008,3 +1021,4 @@ if (currentGame === undefined || currentGame.gameOver) {
 else {
     playRound(currentGame);
 }
+startNewGame(playerList);

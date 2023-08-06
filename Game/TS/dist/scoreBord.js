@@ -1,13 +1,22 @@
-var players = [
-    { score: 100, name: 'John Doe' },
-    { score: 80, name: 'Jane Smith' },
-    { score: 120, name: 'Bob Johnson' },
-    { score: 34, name: 'Pepito' },
-];
+var User = /** @class */ (function () {
+    function User(score, name) {
+        this.score = score;
+        this.name = name;
+    }
+    return User;
+}());
+var players = [];
+var plrs = localStorage.getItem("playerList");
+if (plrs) {
+    var plrsArr = JSON.parse(plrs);
+    plrsArr.forEach(function (plr) {
+        var p = new User(plr.score, plr.player.name);
+        players.push(p);
+    });
+}
 function renderPlayerTable(players) {
     // Sort players by score in descending order
     var sortedPlayers = players.sort(function (a, b) { return b.score - a.score; });
-    console.log(sortedPlayers);
     // Limit the number of players to display (2 to 4)
     var numberOfPlayers = Math.min(sortedPlayers.length, 4);
     var playerTable = document.querySelector('#score-table');

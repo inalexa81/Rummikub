@@ -16,26 +16,6 @@ class Player {
 
 
 }
-let i = 0;
-
-class Square {
-    id: number
-    constructor(public isOccupied: boolean, public imgUrl?: string, public value?: number, public color?: string) {
-        this.id = i
-        i++
-    }
-
-    setOccupiedAndCardProperties(card: Card) {
-        try {
-            this.isOccupied = true
-            this.imgUrl = card.imgUrl
-            this.color = card.color
-            this.value = card.value
-        } catch (error) {
-            console.error(error)
-        }
-    }
-}
 
 function getplayersListFromStorage(): Player[] {
     try {
@@ -176,7 +156,6 @@ class Game {
 
 function loadFromLocalStorage(): Game | undefined {
     try {
-        debugger;
         const gameJSON = localStorage.getItem('Game');
         if (gameJSON) {
             const gameObj = JSON.parse(gameJSON);
@@ -284,8 +263,21 @@ function checkColors(cards: Card[]): boolean | undefined {
 //only one show of each color
 function diffColors(cards: Card[]) {
     try {
-        const colors = new Set(cards.map((card) => card.color));
-        return (colors.size === 4 || colors.size === 3)
+
+
+        const colorsArr = cards.map(function (item) { return item.color });
+        const isDuplicate = colorsArr.some(function (item, idx) {
+            return colorsArr.indexOf(item) != idx
+        });
+        let seriaOfColor: boolean = false
+        if (cards[0].color !== cards[1].color) {
+            seriaOfColor = true
+        }
+        if (isDuplicate && seriaOfColor) {
+            return false
+        } else {
+            return true
+        }
 
     } catch (error) {
         console.error(error);
@@ -301,10 +293,12 @@ function checkAddToSerie(cards: Card[], card: Card): boolean | undefined {
             alert("Minimum three cards")
             return false;
         }
+
         if (cards.findIndex(c => c.value === card.value) === -1) {
             alert(`${card.value} ${card.color} Not part of serie, different number`);
             return false;
         }
+
         const concatenatedCards = [...cards, card];
         if (!diffColors(concatenatedCards)) {
             alert(`${card.value} ${card.color} Can't add, already exist`);
@@ -350,11 +344,30 @@ function compareCardsColor(a: Card, b: Card) {    // sorting by cards value
 }
 
 
-
-
-function addToExist(serie: Card[], cardToAdd: Card):Card | undefined{  // when adding card to an exsit serie on bord
+function splitSeria(existSeria: Card[], cardsToAdd: Card[]) {
     try {
+        const temporaryArr = existSeria.concat(cardsToAdd)
+        temporaryArr.sort(compareCards)
+        const startOfNewSeria = temporaryArr.findIndex((card, index) => card.value === temporaryArr[index + 1].value) + 1
+        const indxOfExistSeria = newSerias.findIndex(seria=>{
+            (seria[0]===existSeria[0])&&(seria[1]===existSeria[1])
+        })        
+        const newSeria1 = temporaryArr.slice(0, startOfNewSeria)
+        const newSeria2 = temporaryArr.slice(startOfNewSeria)
+        newSerias.splice(indxOfExistSeria,1)
+        newSerias.push(newSeria1)
+        newSerias.push(newSeria2)
 
+    renderToMainBord(newSerias, document.querySelector("#board"));
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+
+
+function addToExist(serie: Card[], cardToAdd: Card): Card | undefined {  // when adding card to an exsit serie on bord
+    try {
         if (serie === undefined) throw new Error("No serie cards");
         if (cardToAdd === undefined) throw new Error("No card to add");
         serie.sort(compareCards);
@@ -364,7 +377,7 @@ function addToExist(serie: Card[], cardToAdd: Card):Card | undefined{  // when a
         }
         else {
             if (checkAddToSerial(serie, cardToAdd)) {
-                serie.push(cardToAdd);      
+                serie.push(cardToAdd);
                 alert("added");
                 return cardToAdd;
 
@@ -604,7 +617,7 @@ function playRound(game: Game | undefined) {
     }
 }
 const newSerias: Card[][] = []
-const currentSeria: Card[] = []
+let currentSeria: Card[] = []
 let currentCard: Card;
 let indexOfCurrentCard: number
 
@@ -630,8 +643,6 @@ function cardsEventListener(player: Player, cards: NodeListOf<HTMLDivElement>) {
                         currentSeria.push(currentCard)
 
                     }
-
-                    console.log(currentSeria);
                 }
             })
         })
@@ -781,8 +792,9 @@ function removeFromBord(cards: Card[]) {
 
 function clearSerie(cards: Card[]) {
     try {
-        while (cards.length)
-            cards.pop();
+        // while (cards.length)
+        cards.forEach(card => cards.pop())
+        // cards.pop();
     } catch (error) {
         console.error(error)
     }
@@ -806,7 +818,8 @@ function closeSeria() {
 
                 }
                 newSerias.push(temp.sort(compareCards));
-                clearSerie(currentSeria);
+                // clearSerie(currentSeria);
+                currentSeria = [];
             }
         }
 
@@ -904,10 +917,14 @@ function checkSumAtLeast30(serias: Card[][]): number {
     }
 }
 
-function chooseCardToAdd(serie: Card[]) :Card | undefined{
+function chooseCardToAdd(serie: Card[]): Card | undefined {
     try {
         debugger;
-        if (currentSeria.length !== 1) alert("Pleas choose only one card from your board before adding it to exist")
+        if (currentSeria.length > 1) {
+            splitSeria(serie,currentSeria)
+        }
+        
+        // alert("Pleas choose only one card from your board before adding it to exist")
         else {
             return addToExist(serie, currentSeria[0]);
         }
@@ -918,8 +935,8 @@ function chooseCardToAdd(serie: Card[]) :Card | undefined{
 
 function convertToCards(cards: Element): Card[] {
     try {
-        if(currentGame === undefined)throw new Error("no gamee")
-        const cardsIndx = currentGame?.board.series.findIndex(serie => serie.id === cards.id);
+        if (currentGame === undefined) throw new Error("no gamee")
+        const cardsIndx = currentGame.board.series.findIndex(serie => serie.id === cards.id);
         const cArr = currentGame.board.series[cardsIndx].cards.map((card) => ({ ...card }));
         return cArr;
     } catch (error) {
@@ -937,7 +954,7 @@ function removeCardfromPlayer(card: Card) {
             currentSeria.pop();
             renderPlayerBord(currentPlayer, document.querySelector("#player"));
         }
-        
+
     } catch (error) {
         console.error(error)
     }
@@ -956,7 +973,7 @@ function renderAddCardSerie(serie: Element, card: Card) {
             currentGame?.board.series[indx].cards.forEach(card => {
                 div.innerHTML += `<div class="card" style="background-image: url('${card.imgUrl}');"></div>`
             })
-            
+
         }
     } catch (error) {
         console.error(error)
@@ -965,18 +982,21 @@ function renderAddCardSerie(serie: Element, card: Card) {
 
 function setExistListenner(series: NodeListOf<Element>) {
     try {
-        series.forEach((serie) => {
-            serie.addEventListener("mouseenter", () => {
-                debugger;
-                const turTocard = convertToCards(serie)
-                const card = chooseCardToAdd(turTocard);
-                if (card !== undefined)
-                {
-                    renderAddCardSerie(serie, card);
-                    
-                }
-            }); // Pass an anonymous function to addEventListener
-        });
+        if (currentPlayer.firstDrop) {
+
+            series.forEach((serie) => {
+                serie.addEventListener("mouseenter", () => {
+                    debugger;
+                    const turTocard = convertToCards(serie)
+                    const card = chooseCardToAdd(turTocard);
+                    if (card !== undefined) {
+                        renderAddCardSerie(serie, card);
+
+                    }
+                }); // Pass an anonymous function to addEventListener
+            });
+        }
+        currentSeria = []
     } catch (error) {
         console.error(error)
     }
@@ -1041,3 +1061,5 @@ if (currentGame === undefined || currentGame.gameOver) {
 else {
     playRound(currentGame);
 }
+
+startNewGame(playerList)

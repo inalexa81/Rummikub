@@ -1,17 +1,22 @@
 
 
-interface User {
-  score: number;
-  name: string;
+class User {
+  constructor(public score: number, public name: string) {
+  }
+}
+const players: User[] = [];
+
+const plrs = localStorage.getItem("playerList")
+if (plrs) {
+
+  const plrsArr = JSON.parse(plrs)
+  plrsArr.forEach(plr => {
+    const p = new User(plr.score, plr.player.name)
+    players.push(p)
+  })
 }
 
-const players: User[] = [
-  { score: 100, name: 'John Doe' },
-  { score: 80, name: 'Jane Smith' },
-  { score: 120, name: 'Bob Johnson' },
-  { score: 34, name: 'Pepito' },
 
-];
 
 
 
@@ -19,7 +24,6 @@ const players: User[] = [
 function renderPlayerTable(players: User[]) {
   // Sort players by score in descending order
   const sortedPlayers = players.sort((a, b) => b.score - a.score);
-  console.log(sortedPlayers);
   // Limit the number of players to display (2 to 4)
   const numberOfPlayers = Math.min(sortedPlayers.length, 4);
 
