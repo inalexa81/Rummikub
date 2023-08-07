@@ -86,7 +86,7 @@ class Game {
         if (player3 !== undefined) this.players.push({ player: player3, score: 0 });
         if (player4 !== undefined) this.players.push({ player: player4, score: 0 });
         this.startIndx = (startIndx !== undefined) ? startIndx : this.startIndx;
-        this.currIndx = (currIndx !== undefined) ? currIndx : this.currIndx;
+        this.currIndx = (currIndx !== undefined) ? currIndx : this.startIndx;
         this.gameOver = (gameOver !== undefined) ? gameOver : false;
         this.countRounds = (countRounds !== undefined) ? countRounds : 0;
         this.board = (board !== undefined) ? board : new Bord();
@@ -125,6 +125,7 @@ class Game {
             this.startIndx = this.players.findIndex(p => p.player.name === playersPick[0].player.name);
             alert(`${playersPick[0].player.name.toUpperCase()} you got the higest card, you go first`);
             this.currIndx = this.startIndx;
+            localStorage.setItem("Game", JSON.stringify(currentGame));
             console.log(playersPick);
             this.returnCardToDeck(playersPick);
         } catch (error) {
@@ -289,19 +290,19 @@ function diffColors(cards: Card[]) {
 function checkAddToSerie(cards: Card[], card: Card): boolean | undefined {
     try {
         if (cards === undefined || !cards) throw new Error("No cards");
-        if (cards.length < 3) {
-            alert("Minimum three cards")
-            return false;
-        }
+        // if (cards.length < 3) {
+        //     // alert("Minimum three cards")
+        //     return false;
+        // }
 
         if (cards.findIndex(c => c.value === card.value) === -1) {
-            alert(`${card.value} ${card.color} Not part of serie, different number`);
+            // alert(`${card.value} ${card.color} Not part of serie, different number`);
             return false;
         }
 
         const concatenatedCards = [...cards, card];
         if (!diffColors(concatenatedCards)) {
-            alert(`${card.value} ${card.color} Can't add, already exist`);
+            // alert(`${card.value} ${card.color} Can't add, already exist`);
             return false;
         }
         return true;
@@ -349,16 +350,16 @@ function splitSeria(existSeria: Card[], cardsToAdd: Card[]) {
         const temporaryArr = existSeria.concat(cardsToAdd)
         temporaryArr.sort(compareCards)
         const startOfNewSeria = temporaryArr.findIndex((card, index) => card.value === temporaryArr[index + 1].value) + 1
-        const indxOfExistSeria = newSerias.findIndex(seria=>{
-            (seria[0]===existSeria[0])&&(seria[1]===existSeria[1])
-        })        
+        const indxOfExistSeria = newSerias.findIndex(seria => {
+            (seria[0] === existSeria[0]) && (seria[1] === existSeria[1])
+        })
         const newSeria1 = temporaryArr.slice(0, startOfNewSeria)
         const newSeria2 = temporaryArr.slice(startOfNewSeria)
-        newSerias.splice(indxOfExistSeria,1)
+        newSerias.splice(indxOfExistSeria, 1)
         newSerias.push(newSeria1)
         newSerias.push(newSeria2)
 
-    renderToMainBord(newSerias, document.querySelector("#board"));
+        renderToMainBord(newSerias, document.querySelector("#board"));
     } catch (error) {
         console.error(error)
     }
@@ -603,6 +604,24 @@ function startNewGame(players: Player[]) {
 
 }
 
+function uploadBoard(game: Game, board: HTMLDivElement | null) {
+    try {
+        if (!board) throw new Error("No #board")
+        board.innerHTML = ``;
+        game.board.series.forEach(s => {
+            board.innerHTML += `<div class="seria" id="${s.id}"></div>`;
+            const space = document.getElementById(`${s.id}`);
+            if(!space)throw new Error("no seria to draw on")
+            s.cards.forEach(card => {
+                space.innerHTML += `<div class="card" style="background-image: url('${card.imgUrl}');"></div>`
+            })
+            
+        })
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 
 function playRound(game: Game | undefined) {
     try {
@@ -610,6 +629,7 @@ function playRound(game: Game | undefined) {
         let bigginer = game.startIndx;
         let empty = false; //player with empty hands
         currentPlayer = game.players[bigginer].player;
+        if (game.board.series.length > 0) uploadBoard(game, document.querySelector("#board"));
         deal14Cards(game);
         renderPlayerBord(currentPlayer, document.querySelector("#player"));
     } catch (error) {
@@ -670,12 +690,12 @@ function deal14Cards(game: Game) {
 function renderPlayerManu(player: Player, div: HTMLDivElement | null) {
     try {
         if (!div) throw new Error("No #player");
-        div.innerHTML = `<button name="close" onclick="hundleOnClick(event)">close Seria</button>
-        <button name="done" onclick="hundleOnClick(event)">Done</button>
-        <button name="card" onclick="hundleOnClick(event)">Get Card</button>
-        <button name="sortColor" onclick="hundleOnClick(event)">Sort By Color</button>
-        <button name="sortValue" onclick="hundleOnClick(event)">Sort By Value</button>
-        <button name="addToSeria" onclick="hundleOnClick(event)">Add to Seria</button>`
+        div.innerHTML = `<button id="close" name="close" onclick="hundleOnClick(event)">close Seria</button>
+        <button id="done" name="done" onclick="hundleOnClick(event)"></button>
+        <button id="draw" name="card" onclick="hundleOnClick(event)">Get Card</button>
+        <button id="sortColor" name="sortColor" onclick="hundleOnClick(event)">Sort By Color</button>
+        <button id="sortValue" name="sortValue" onclick="hundleOnClick(event)">Sort By Value</button>
+        <button id="addToSeria" name="addToSeria" onclick="hundleOnClick(event)">Add to Seria</button>`
 
         cardsEventListener(player, document.querySelectorAll(".card"));
     } catch (error) {
@@ -711,6 +731,7 @@ function setNextPlayer() {
         const nextIndx = currentGame.currIndx + 1 === currentGame.players.length ? 0 : currentGame.currIndx + 1
         currentPlayer = currentGame.players[nextIndx].player;
         currentGame.currIndx = nextIndx;
+
         renderPlayerBord(currentPlayer, document.querySelector("#player"));
     } catch (error) {
         console.error(error)
@@ -751,7 +772,7 @@ function endOfGame(win: string, indx: number) {
             alert("Four rounds completed game over");
             currentGame.gameOver = true;
         }
-        localStorage.setItem("playerList", JSON.stringify(currentGame.players))
+        localStorage.setItem("Game", JSON.stringify(currentGame))
         location.href = "../HTML/scoreBoard.html"
     } catch (error) {
         console.error(error)
@@ -768,7 +789,7 @@ function takeCard() {
         const card = currentGame.gameDeck.pop()
         if (card === undefined) throw new Error("no card");
         currentPlayer.cards.push(card)
-        localStorage.setItem("playerList", JSON.stringify(currentGame.players))
+        localStorage.setItem("Game", JSON.stringify(currentGame))
         renderPlayerBord(currentPlayer, document.querySelector("#player"))
         setTimeout(() => {
             setNextPlayer();
@@ -874,8 +895,8 @@ function returnCardsToBord(cardsToReturn: Card[][], player: Player) {
 
 function checkDone() {
     try {
-
-        if (newSerias.length > 0) {
+        debugger;
+        if (newSerias[newSerias.length - 1].length > 0) {
             if (!currentPlayer.firstDrop) {
                 if (checkSumAtLeast30(newSerias) >= 30) {
                     currentPlayer.firstDrop = true;
@@ -883,6 +904,7 @@ function checkDone() {
                     setNextPlayer();
                 }
                 else {
+                    alert("to drop first cards you need Minimun values of 30 of all cards to drop")
                     returnCardsToBord(newSerias, currentPlayer);
                 }
             }
@@ -921,9 +943,9 @@ function chooseCardToAdd(serie: Card[]): Card | undefined {
     try {
         debugger;
         if (currentSeria.length > 1) {
-            splitSeria(serie,currentSeria)
+            splitSeria(serie, currentSeria)
         }
-        
+
         // alert("Pleas choose only one card from your board before adding it to exist")
         else {
             return addToExist(serie, currentSeria[0]);
@@ -991,7 +1013,8 @@ function setExistListenner(series: NodeListOf<Element>) {
                     const card = chooseCardToAdd(turTocard);
                     if (card !== undefined) {
                         renderAddCardSerie(serie, card);
-
+                        const more = confirm("Pass turn?")
+                        if (more) setNextPlayer();
                     }
                 }); // Pass an anonymous function to addEventListener
             });
@@ -1047,6 +1070,7 @@ function sortByValue() {
 }
 
 // GAME
+debugger;
 let currentPlayer: Player;
 let playerList: Player[] = getplayersListFromStorage();
 let currentGame: Game | undefined = loadFromLocalStorage();
@@ -1059,7 +1083,5 @@ if (currentGame === undefined || currentGame.gameOver) {
         location.href = "../HTML/index.html";
 }
 else {
-    playRound(currentGame);
+    playRound(currentGame)
 }
-
-startNewGame(playerList)

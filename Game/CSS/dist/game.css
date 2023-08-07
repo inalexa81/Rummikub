@@ -14,7 +14,9 @@ body {
   display: flex;
   margin-bottom: 20px;
   margin-left: 13vw;
-  background-color: aqua;
+  background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2euvBiI25wMMVTRYXCA1zxKIIGq6MScZJOg&usqp=CAU);
+  background-repeat: no-repeat;
+  background-size: cover;
   justify-content: space-evenly;
   display: flex;
   flex-wrap: wrap;
@@ -87,11 +89,16 @@ body {
   left: -200px;
 }
 #player #playerAction button {
-  height: 50px;
-  width: 100px;
+  height: 60px;
+  width: 60px;
   border-radius: 10px;
 }
 #player #playerAction button:hover {
   cursor: pointer;
   background-color: aqua;
+}
+#player #playerAction #done {
+  background-image: url(https://o.remove.bg/downloads/cfe7bbc4-6617-4845-820f-99f4829cbe39/check-removebg-preview.png);
+  background-repeat: no-repeat;
+  background-size: contain;
 }
