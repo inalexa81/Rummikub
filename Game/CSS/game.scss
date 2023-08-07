@@ -15,18 +15,20 @@ body {
     display: flex;
     margin-bottom: 20px;
     margin-left: 13vw;
-    background-color: aqua;
+    background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2euvBiI25wMMVTRYXCA1zxKIIGq6MScZJOg&usqp=CAU);
+    background-repeat: no-repeat;
+    background-size: cover;
     justify-content: space-evenly;
     display: flex;
     flex-wrap: wrap;
 
-    .seria{
+    .seria {
         width: fit-content;
-        height:fit-content;
+        height: fit-content;
         display: flex;
         flex-wrap: nowrap;
         justify-content: center;
-        
+
         .card {
             background-size: cover;
             width: 65px;
@@ -60,14 +62,16 @@ body {
     flex-direction: column;
 
     justify-content: center;
-    #cards{
+
+    #cards {
         width: 100%;
         height: fit-content;
         display: flex;
         justify-content: space-evenly;
         position: relative;
-        left:30px;
+        left: 30px;
         flex-wrap: wrap;
+
         .card {
             margin-top: 5px;
             background-size: cover;
@@ -80,14 +84,14 @@ body {
     }
 
 
-    p{
+    p {
         position: absolute;
         top: 75%;
         font-size: 1.2rem;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
     }
 
-    #playerAction{
+    #playerAction {
         width: 200px;
         height: 100%;
         display: flex;
@@ -95,15 +99,22 @@ body {
         position: absolute;
         left: -200px;
 
-        button{
-            height: 50px;
-            width: 100px;
+
+        button {
+            height: 60px;
+            width: 60px;
             border-radius: 10px;
         }
 
-        button:hover{
-            cursor:pointer;
+        button:hover {
+            cursor: pointer;
             background-color: aqua;
+        }
+
+        #done {
+            background-image: url(https://o.remove.bg/downloads/cfe7bbc4-6617-4845-820f-99f4829cbe39/check-removebg-preview.png);
+            background-repeat: no-repeat;
+            background-size: contain;
         }
 
     }

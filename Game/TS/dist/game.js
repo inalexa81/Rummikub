@@ -84,7 +84,7 @@ var Game = /** @class */ (function () {
         if (player4 !== undefined)
             this.players.push({ player: player4, score: 0 });
         this.startIndx = (startIndx !== undefined) ? startIndx : this.startIndx;
-        this.currIndx = (currIndx !== undefined) ? currIndx : this.currIndx;
+        this.currIndx = (currIndx !== undefined) ? currIndx : this.startIndx;
         this.gameOver = (gameOver !== undefined) ? gameOver : false;
         this.countRounds = (countRounds !== undefined) ? countRounds : 0;
         this.board = (board !== undefined) ? board : new Bord();
@@ -123,6 +123,7 @@ var Game = /** @class */ (function () {
             this.startIndx = this.players.findIndex(function (p) { return p.player.name === playersPick_1[0].player.name; });
             alert(playersPick_1[0].player.name.toUpperCase() + " you got the higest card, you go first");
             this.currIndx = this.startIndx;
+            localStorage.setItem("Game", JSON.stringify(currentGame));
             console.log(playersPick_1);
             this.returnCardToDeck(playersPick_1);
         }
@@ -275,17 +276,17 @@ function checkAddToSerie(cards, card) {
     try {
         if (cards === undefined || !cards)
             throw new Error("No cards");
-        if (cards.length < 3) {
-            alert("Minimum three cards");
-            return false;
-        }
+        // if (cards.length < 3) {
+        //     // alert("Minimum three cards")
+        //     return false;
+        // }
         if (cards.findIndex(function (c) { return c.value === card.value; }) === -1) {
-            alert(card.value + " " + card.color + " Not part of serie, different number");
+            // alert(`${card.value} ${card.color} Not part of serie, different number`);
             return false;
         }
         var concatenatedCards = __spreadArrays(cards, [card]);
         if (!diffColors(concatenatedCards)) {
-            alert(card.value + " " + card.color + " Can't add, already exist");
+            // alert(`${card.value} ${card.color} Can't add, already exist`);
             return false;
         }
         return true;
@@ -575,6 +576,25 @@ function startNewGame(players) {
         console.error(error);
     }
 }
+function uploadBoard(game, board) {
+    try {
+        if (!board)
+            throw new Error("No #board");
+        board.innerHTML = "";
+        game.board.series.forEach(function (s) {
+            board.innerHTML += "<div class=\"seria\" id=\"" + s.id + "\"></div>";
+            var space = document.getElementById("" + s.id);
+            if (!space)
+                throw new Error("no seria to draw on");
+            s.cards.forEach(function (card) {
+                space.innerHTML += "<div class=\"card\" style=\"background-image: url('" + card.imgUrl + "');\"></div>";
+            });
+        });
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
 function playRound(game) {
     try {
         if (game === undefined)
@@ -582,6 +602,8 @@ function playRound(game) {
         var bigginer = game.startIndx;
         var empty = false; //player with empty hands
         currentPlayer = game.players[bigginer].player;
+        if (game.board.series.length > 0)
+            uploadBoard(game, document.querySelector("#board"));
         deal14Cards(game);
         renderPlayerBord(currentPlayer, document.querySelector("#player"));
     }
@@ -642,7 +664,7 @@ function renderPlayerManu(player, div) {
     try {
         if (!div)
             throw new Error("No #player");
-        div.innerHTML = "<button name=\"close\" onclick=\"hundleOnClick(event)\">close Seria</button>\n        <button name=\"done\" onclick=\"hundleOnClick(event)\">Done</button>\n        <button name=\"card\" onclick=\"hundleOnClick(event)\">Get Card</button>\n        <button name=\"sortColor\" onclick=\"hundleOnClick(event)\">Sort By Color</button>\n        <button name=\"sortValue\" onclick=\"hundleOnClick(event)\">Sort By Value</button>\n        <button name=\"addToSeria\" onclick=\"hundleOnClick(event)\">Add to Seria</button>";
+        div.innerHTML = "<button id=\"close\" name=\"close\" onclick=\"hundleOnClick(event)\">close Seria</button>\n        <button id=\"done\" name=\"done\" onclick=\"hundleOnClick(event)\"></button>\n        <button id=\"draw\" name=\"card\" onclick=\"hundleOnClick(event)\">Get Card</button>\n        <button id=\"sortColor\" name=\"sortColor\" onclick=\"hundleOnClick(event)\">Sort By Color</button>\n        <button id=\"sortValue\" name=\"sortValue\" onclick=\"hundleOnClick(event)\">Sort By Value</button>\n        <button id=\"addToSeria\" name=\"addToSeria\" onclick=\"hundleOnClick(event)\">Add to Seria</button>";
         cardsEventListener(player, document.querySelectorAll(".card"));
     }
     catch (error) {
@@ -715,7 +737,7 @@ function endOfGame(win, indx) {
             alert("Four rounds completed game over");
             currentGame.gameOver = true;
         }
-        localStorage.setItem("playerList", JSON.stringify(currentGame.players));
+        localStorage.setItem("Game", JSON.stringify(currentGame));
         location.href = "../HTML/scoreBoard.html";
     }
     catch (error) {
@@ -733,7 +755,7 @@ function takeCard() {
         if (card === undefined)
             throw new Error("no card");
         currentPlayer.cards.push(card);
-        localStorage.setItem("playerList", JSON.stringify(currentGame.players));
+        localStorage.setItem("Game", JSON.stringify(currentGame));
         renderPlayerBord(currentPlayer, document.querySelector("#player"));
         setTimeout(function () {
             setNextPlayer();
@@ -830,7 +852,8 @@ function returnCardsToBord(cardsToReturn, player) {
 }
 function checkDone() {
     try {
-        if (newSerias.length > 0) {
+        debugger;
+        if (newSerias[newSerias.length - 1].length > 0) {
             if (!currentPlayer.firstDrop) {
                 if (checkSumAtLeast30(newSerias) >= 30) {
                     currentPlayer.firstDrop = true;
@@ -838,6 +861,7 @@ function checkDone() {
                     setNextPlayer();
                 }
                 else {
+                    alert("to drop first cards you need Minimun values of 30 of all cards to drop");
                     returnCardsToBord(newSerias, currentPlayer);
                 }
             }
@@ -943,6 +967,9 @@ function setExistListenner(series) {
                     var card = chooseCardToAdd(turTocard);
                     if (card !== undefined) {
                         renderAddCardSerie(serie, card);
+                        var more = confirm("Pass turn?");
+                        if (more)
+                            setNextPlayer();
                     }
                 }); // Pass an anonymous function to addEventListener
             });
@@ -1008,6 +1035,7 @@ function sortByValue() {
     }
 }
 // GAME
+debugger;
 var currentPlayer;
 var playerList = getplayersListFromStorage();
 var currentGame = loadFromLocalStorage();
@@ -1021,4 +1049,3 @@ if (currentGame === undefined || currentGame.gameOver) {
 else {
     playRound(currentGame);
 }
-startNewGame(playerList);
