@@ -611,11 +611,11 @@ function uploadBoard(game: Game, board: HTMLDivElement | null) {
         game.board.series.forEach(s => {
             board.innerHTML += `<div class="seria" id="${s.id}"></div>`;
             const space = document.getElementById(`${s.id}`);
-            if(!space)throw new Error("no seria to draw on")
+            if (!space) throw new Error("no seria to draw on")
             s.cards.forEach(card => {
                 space.innerHTML += `<div class="card" style="background-image: url('${card.imgUrl}');"></div>`
             })
-            
+
         })
     } catch (error) {
         console.error(error)
@@ -691,7 +691,7 @@ function renderPlayerManu(player: Player, div: HTMLDivElement | null) {
     try {
         if (!div) throw new Error("No #player");
         div.innerHTML = `<button id="close" name="close" onclick="hundleOnClick(event)">close Seria</button>
-        <button id="done" name="done" onclick="hundleOnClick(event)"></button>
+        <button id="done" name="done" onclick="hundleOnClick(event)">Done</button>
         <button id="draw" name="card" onclick="hundleOnClick(event)">Get Card</button>
         <button id="sortColor" name="sortColor" onclick="hundleOnClick(event)">Sort By Color</button>
         <button id="sortValue" name="sortValue" onclick="hundleOnClick(event)">Sort By Value</button>

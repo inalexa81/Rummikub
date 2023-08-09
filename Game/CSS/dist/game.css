@@ -97,8 +97,3 @@ body {
   cursor: pointer;
   background-color: aqua;
 }
-#player #playerAction #done {
-  background-image: url(https://o.remove.bg/downloads/cfe7bbc4-6617-4845-820f-99f4829cbe39/check-removebg-preview.png);
-  background-repeat: no-repeat;
-  background-size: contain;
-}
