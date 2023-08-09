@@ -664,7 +664,7 @@ function renderPlayerManu(player, div) {
     try {
         if (!div)
             throw new Error("No #player");
-        div.innerHTML = "<button id=\"close\" name=\"close\" onclick=\"hundleOnClick(event)\">close Seria</button>\n        <button id=\"done\" name=\"done\" onclick=\"hundleOnClick(event)\"></button>\n        <button id=\"draw\" name=\"card\" onclick=\"hundleOnClick(event)\">Get Card</button>\n        <button id=\"sortColor\" name=\"sortColor\" onclick=\"hundleOnClick(event)\">Sort By Color</button>\n        <button id=\"sortValue\" name=\"sortValue\" onclick=\"hundleOnClick(event)\">Sort By Value</button>\n        <button id=\"addToSeria\" name=\"addToSeria\" onclick=\"hundleOnClick(event)\">Add to Seria</button>";
+        div.innerHTML = "<button id=\"close\" name=\"close\" onclick=\"hundleOnClick(event)\">close Seria</button>\n        <button id=\"done\" name=\"done\" onclick=\"hundleOnClick(event)\">Done</button>\n        <button id=\"draw\" name=\"card\" onclick=\"hundleOnClick(event)\">Get Card</button>\n        <button id=\"sortColor\" name=\"sortColor\" onclick=\"hundleOnClick(event)\">Sort By Color</button>\n        <button id=\"sortValue\" name=\"sortValue\" onclick=\"hundleOnClick(event)\">Sort By Value</button>\n        <button id=\"addToSeria\" name=\"addToSeria\" onclick=\"hundleOnClick(event)\">Add to Seria</button>";
         cardsEventListener(player, document.querySelectorAll(".card"));
     }
     catch (error) {
